@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "1056172180019",
+    "firebase_url": "https://distance-app-5b485.firebaseio.com",
+    "project_id": "distance-app-5b485",
+    "storage_bucket": "distance-app-5b485.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1056172180019:android:08b2cc2ab9cc4d24205946",
+        "android_client_info": {
+          "package_name": "com.shimonster.distanceapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1056172180019-cmcc57373qapcjd4kg8idt0rbel0ihda.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwforW1OXIceR8_41dYdNHXXBvZnDE8IA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1056172180019-cmcc57373qapcjd4kg8idt0rbel0ihda.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

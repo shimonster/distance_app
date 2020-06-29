@@ -11,9 +11,11 @@ class MyApp extends StatelessWidget {
       title: 'Distance App',
       theme: ThemeData(
         primarySwatch: Colors.blue,
-        //accentColor: Colors.
+        accentColor: Color.fromARGB(1, 184, 115, 51),
       ),
-      home: Container(),
+      home: Scaffold(
+        backgroundColor: Theme.of(context).accentColor,
+      ),
     );
   }
 }
