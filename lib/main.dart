@@ -59,9 +59,15 @@ class _MyAppState extends State<MyApp> {
                 textTheme: ButtonTextTheme.primary,
               ),
             ),
-            home: snapshot.data == null && _account
-                ? AuthScreen()
-                : DistancesScreen(),
+            home: snapshot.connectionState == ConnectionState.waiting
+                ? Scaffold(
+                    body: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
+                : snapshot.data == null && _account
+                    ? AuthScreen()
+                    : DistancesScreen(),
           ),
         );
       },

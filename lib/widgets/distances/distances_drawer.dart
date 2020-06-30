@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../helpers/sql_helper.dart';
 import '../../providers/categories.dart';
 
 class DistanceDrawer extends StatelessWidget {
@@ -11,7 +10,7 @@ class DistanceDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cats = Provider.of<Categories>(context).categories;
+    final cats = Provider.of<Categories>(context);
 
     return Drawer(
       child: Column(
@@ -22,11 +21,11 @@ class DistanceDrawer extends StatelessWidget {
           ),
           ListView.builder(
             shrinkWrap: true,
-            itemCount: cats.length + 1,
-            itemBuilder: (ctx, i) => i != cats.length
+            itemCount: cats.categories.length + 1,
+            itemBuilder: (ctx, i) => i != cats.categories.length
                 ? InkWell(
                     onTap: () {
-                      selectCategory(cats[i]);
+                      selectCategory(cats.categories[i]);
                     },
                     child: Container(
                       margin: EdgeInsets.only(bottom: 8),
@@ -34,7 +33,7 @@ class DistanceDrawer extends StatelessWidget {
                       decoration: BoxDecoration(
                         border: Border.all(width: 0.5),
                       ),
-                      child: Text(cats[i]),
+                      child: Text(cats.categories[i]),
                     ),
                   )
                 : FlatButton(
@@ -45,7 +44,7 @@ class DistanceDrawer extends StatelessWidget {
                       ],
                     ),
                     onPressed: () {
-                      categoryDbSetup();
+                      cats.addCategory('New');
                     },
                   ),
           ),

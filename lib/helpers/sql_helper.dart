@@ -25,9 +25,13 @@ Future<Database> categoryDbSetup() async {
   );
 }
 
-Future<void> addCategory(String name) async {
+Future<void> addCat(String name) async {
   final Database db = await categoryDbSetup();
-  db.insert('UserCategories', {'title': name});
+  db.insert(
+    'UserCategories',
+    {'title': name},
+    conflictAlgorithm: ConflictAlgorithm.replace,
+  );
 }
 
 Future<List> getCats() async {
