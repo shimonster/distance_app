@@ -1,16 +1,19 @@
 import 'package:flutter/foundation.dart';
 import 'package:latlong/latlong.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+import '../helpers/sql_helper.dart';
 
 class Distance {
   const Distance({
-    this.uid,
+    @required this.id,
     @required this.distance,
     @required this.units,
     @required this.cats,
     @required this.markers,
   });
 
-  final String uid;
+  final String id;
   final double distance;
   final String units;
   final List<String> cats;
@@ -26,5 +29,12 @@ class Distances extends ChangeNotifier {
 
   List<Distance> get distances {
     return [..._distances];
+  }
+
+  Future<void> addDistance(Distance distance) async {
+    if (uid != null) {
+      final putLoc =
+          await Firestore.instance.document('users/$uid/distances').get();
+    }
   }
 }
