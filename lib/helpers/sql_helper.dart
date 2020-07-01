@@ -93,9 +93,11 @@ class SQLHelper {
       });
       distances.add(Distance(
         id: key,
+        name: value[0]['name'],
+        time: value[0]['time'],
         distance: distance,
         markers: value.map((e) => ll.LatLng(e['lat'], e['lng'])).toList(),
-        cats: value[0]['cat'],
+        cat: value[0]['cat'],
         units: 'meters',
       ));
     });
