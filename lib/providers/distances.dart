@@ -65,7 +65,7 @@ class Distances extends ChangeNotifier {
 
   Future<void> getDistances() async {
     try {
-      if(uid != null) {
+      if (uid != null) {
         final result = await Firestore.instance
             .collection('users/$uid/distances')
             .getDocuments();
@@ -88,7 +88,7 @@ class Distances extends ChangeNotifier {
       } else {
         _distances = await SQLHelper.getDistances();
       }
-    } on PlatformException catch(error) {
+    } on PlatformException catch (error) {
       _distances = await SQLHelper.getDistances();
     } catch (error) {
       throw error;
