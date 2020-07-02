@@ -7,34 +7,34 @@ import 'package:latlong/latlong.dart' as ll;
 import 'package:maps_toolkit/maps_toolkit.dart';
 
 class SQLHelper {
-  static Future<Database> distanceDbSetup() async {
+  static Future<Database> distanceDbSetup(String uid) async {
     final dbPath = await getDatabasesPath();
     return await openDatabase(
-      join(dbPath, 'distancePoints.db'),
+      join(dbPath, '${uid}Distances.db'),
       version: 1,
       onCreate: (db, _) {
-        return db.execute(
-            'CREATE TABLE UserDistancePoints (id TEXT PRIMARY KEY, name TEXT, cat TEXT, time TEXT, lat REAL, lng REAL, alt REAL)');
+        return db.execute('CREATE TABLE ${uid}Distances '
+            '(id TEXT PRIMARY KEY, name TEXT, cat TEXT, time TEXT, lat REAL, lng REAL, alt REAL)');
       },
     );
   }
 
-  static Future<Database> categoryDbSetup() async {
+  static Future<Database> categoryDbSetup(String uid) async {
     final dbPath = await getDatabasesPath();
     return openDatabase(
-      join(dbPath + 'cats.db'),
+      join(dbPath + '${uid}Categories.db'),
       version: 1,
       onCreate: (db, _) {
         return db.execute(
-          'CREATE TABLE UserCategories'
+          'CREATE TABLE ${uid}Categories'
           '(id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT)',
         );
       },
     );
   }
 
-  static Future<void> addCategory(String name) async {
-    final Database db = await categoryDbSetup();
+  static Future<void> addCategory(String name, String uid) async {
+    final Database db = await categoryDbSetup(uid);
     final id = await db.insert(
       'UserCategories',
       {'title': name},
@@ -42,39 +42,39 @@ class SQLHelper {
     );
   }
 
-  static Future<List> getCategories() async {
-    final db = await categoryDbSetup();
+  static Future<List> getCategories(String uid) async {
+    final db = await categoryDbSetup(uid);
     final cats = await db.query('', columns: ['title']);
     return cats;
   }
 
   static Future<void> addDistance(String id, String name, String units,
-      String category, List<Map<String, dynamic>> points) async {
-    final Database db = await distanceDbSetup();
+      String category, List<Map<String, dynamic>> points, String uid) async {
+    final Database db = await distanceDbSetup(uid);
     points.forEach((point) {
-      db.insert('UserDistancePoints', {
-        'id': id,
+      db.insert('UserDistancesPoints', {
+        'id': id + point['time'].toString(),
         'name': name,
-        'time': point['time'],
         'cat': category,
+        'time': point['time'].toString(),
         'lat': point['LatLng'].latitude,
         'lng': point['LatLng'].longitude,
-        'alt': point['Alt'],
+        'alt': point['alt'],
       });
     });
   }
 
-  static Future<List<Distance>> getDistances() async {
-    final db = await categoryDbSetup();
+  static Future<List<Distance>> getDistances(String uid) async {
+    final db = await distanceDbSetup(uid);
     Map<String, List<Map>> pointList = {};
     List<Distance> distances = [];
     final points =
-        await db.query('UserDistancePoints', groupBy: 'id', orderBy: 'time');
-    points.forEach((point) {
+        await db.query('UserDistancesPoints', groupBy: 'id', orderBy: 'time');
+    points.forEach((Map<dynamic, dynamic> point) {
       if (pointList.containsKey(point['id'])) {
         pointList[point['id']].add(point);
       } else {
-        pointList.update(point['id'], (value) => [point]);
+        pointList.putIfAbsent(point['id'], () => [point]);
       }
     });
     pointList.forEach((key, value) {
@@ -94,13 +94,14 @@ class SQLHelper {
       distances.add(Distance(
         id: key,
         name: value[0]['name'],
-        time: value[0]['time'],
+        time: DateTime.parse(value[0]['time']),
         distance: distance,
         markers: value.map((e) => ll.LatLng(e['lat'], e['lng'])).toList(),
         cat: value[0]['cat'],
         units: 'meters',
       ));
     });
+    print(distances);
     return distances;
   }
 }

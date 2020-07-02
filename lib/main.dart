@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:test/test.dart';
+import 'package:latlong/latlong.dart';
 
 import './providers/categories.dart';
 import './providers/distances.dart';
@@ -25,6 +27,14 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  void testDist() {}
+
+  @override
+  void initState() {
+    testDist();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
@@ -38,11 +48,11 @@ class _MyAppState extends State<MyApp> {
                 snapshot.data != null ? snapshot.data.uid : null,
               ),
             ),
-            ProxyProvider<Categories, Distances>(
+            ChangeNotifierProxyProvider<Categories, Distances>(
               update: (ctx, cat, prev) => Distances(
                 snapshot.data != null ? snapshot.data.uid : null,
                 cat.categories,
-                prev.distances,
+                prev == null ? [] : prev.distances,
               ),
             ),
           ],
@@ -66,7 +76,7 @@ class _MyAppState extends State<MyApp> {
                     ),
                   )
                 : snapshot.data == null && _account
-                    ? AuthScreen()
+                    ? AuthScreen(_switchMode)
                     : DistancesScreen(),
           ),
         );

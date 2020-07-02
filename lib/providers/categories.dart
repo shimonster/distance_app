@@ -23,7 +23,7 @@ class Categories extends ChangeNotifier {
             .setData({'categories': _categories});
       }
       _categories.add(title);
-      await SQLHelper.addCategory(title);
+      await SQLHelper.addCategory(title, uid ?? '');
     } catch (error) {
       throw error;
     }
@@ -38,10 +38,10 @@ class Categories extends ChangeNotifier {
         _categories = cats.data['categories'];
       } else {
         print('devise');
-        _categories = await SQLHelper.getCategories();
+        _categories = await SQLHelper.getCategories(uid ?? '');
       }
     } on PlatformException catch (error) {
-      _categories = await SQLHelper.getCategories();
+      _categories = await SQLHelper.getCategories(uid ?? '');
     } catch (error) {
       throw error;
     }

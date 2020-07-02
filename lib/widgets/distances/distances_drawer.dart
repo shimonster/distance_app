@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -5,9 +6,10 @@ import 'package:provider/provider.dart';
 import '../../providers/categories.dart';
 
 class DistanceDrawer extends StatefulWidget {
-  DistanceDrawer(this.selectCategory);
+  DistanceDrawer(this.selectCategory, this.addCategory);
 
   final void Function(String cat) selectCategory;
+  final Future<void> Function(TextEditingController name) addCategory;
 
   @override
   _DistanceDrawerState createState() => _DistanceDrawerState();
@@ -17,6 +19,7 @@ class _DistanceDrawerState extends State<DistanceDrawer> {
   var _didInit = false;
   var _isLoading = false;
   var _isAdding = false;
+  var _isProcessingAdd = false;
   final _name = TextEditingController();
 
   @override
@@ -34,6 +37,16 @@ class _DistanceDrawerState extends State<DistanceDrawer> {
     super.didChangeDependencies();
   }
 
+  void addCat() {
+    setState(() {
+      _isProcessingAdd = true;
+      Provider.of<Categories>(context).addCategory(_name.text).then((value) {
+        _isProcessingAdd = false;
+        _isAdding = false;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final cats = Provider.of<Categories>(context, listen: true);
@@ -44,6 +57,14 @@ class _DistanceDrawerState extends State<DistanceDrawer> {
           AppBar(
             title: Text('Categories'),
             automaticallyImplyLeading: false,
+            actions: <Widget>[
+              IconButton(
+                icon: Icon(Icons.exit_to_app),
+                onPressed: () {
+                  FirebaseAuth.instance.signOut();
+                },
+              ),
+            ],
           ),
           if (_isLoading)
             Expanded(
@@ -107,36 +128,43 @@ class _DistanceDrawerState extends State<DistanceDrawer> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
-                              Container(
-                                width: 200,
-                                child: TextField(
-                                  controller: _name,
-                                  onChanged: (_) {
-                                    setState(() {});
-                                  },
-                                  onSubmitted: _name.text == ''
-                                      ? null
-                                      : (_) {
-                                          cats.addCategory(_name.text);
-                                          _isAdding = false;
-                                        },
-                                  autofocus: true,
-                                  enableSuggestions: true,
-                                  textAlignVertical: TextAlignVertical.bottom,
-                                  decoration: InputDecoration(
-                                    hintText: 'Name',
-                                    border: InputBorder.none,
+                              Expanded(
+                                child: Container(
+                                  width: 200,
+                                  child: TextField(
+                                    controller: _name,
+                                    onChanged: (_) {
+                                      setState(() {});
+                                    },
+                                    onSubmitted: _name.text == ''
+                                        ? null
+                                        : (_) {
+                                            setState(() {
+                                              _isProcessingAdd = true;
+                                              _isAdding = false;
+                                              widget
+                                                  .addCategory(_name)
+                                                  .then((value) {
+                                                _isProcessingAdd = false;
+                                                _isAdding = false;
+                                              });
+                                            });
+                                          },
+                                    autofocus: true,
+                                    enableSuggestions: true,
+                                    textAlignVertical: TextAlignVertical.bottom,
+                                    decoration: InputDecoration(
+                                      hintText: 'Name',
+                                      border: InputBorder.none,
+                                    ),
                                   ),
                                 ),
                               ),
                               IconButton(
-                                icon: Icon(Icons.check_circle_outline),
-                                onPressed: _name.text == ''
-                                    ? null
-                                    : () {
-                                        cats.addCategory(_name.text);
-                                        _isAdding = false;
-                                      },
+                                icon: _isProcessingAdd
+                                    ? Icon(Icons.cloud_upload)
+                                    : Icon(Icons.check_circle_outline),
+                                onPressed: _name.text == '' ? null : () {},
                               ),
                             ],
                           ),

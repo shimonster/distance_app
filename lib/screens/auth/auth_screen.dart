@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import '../../widgets/auth/auth_card.dart';
 
 class AuthScreen extends StatelessWidget {
+  AuthScreen(this.switchMode);
+
+  final void Function() switchMode;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,7 +30,7 @@ class AuthScreen extends StatelessWidget {
               ),
             ),
             child: Center(
-              child: AuthCard(),
+              child: AuthCard(switchMode),
             ),
           ),
         ],

@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class AuthCard extends StatefulWidget {
+  AuthCard(this.switchMode);
+
+  final void Function() switchMode;
+
   @override
   _AuthCardState createState() => _AuthCardState();
 }
@@ -13,17 +17,24 @@ class _AuthCardState extends State<AuthCard> {
   bool _isLogin = true;
   String email;
   String password;
+  bool _isLoading = false;
 
   Future<void> _authenticate() async {
     final auth = FirebaseAuth.instance;
     if (_form.currentState.validate()) {
       try {
+        setState(() {
+          _isLoading = true;
+        });
         _form.currentState.save();
         if (_isLogin) {
           auth.signInWithEmailAndPassword(email: email, password: password);
         } else {
           auth.createUserWithEmailAndPassword(email: email, password: password);
         }
+        setState(() {
+          _isLoading = false;
+        });
       } on PlatformException catch (error) {
         Scaffold.of(context).hideCurrentSnackBar();
         Scaffold.of(context).showSnackBar(
@@ -103,44 +114,51 @@ class _AuthCardState extends State<AuthCard> {
                   SizedBox(
                     height: 10,
                   ),
-                  RaisedButton(
-                    child: Text(_isLogin ? 'Login' : 'Signup'),
-                    onPressed: _authenticate,
-                  ),
+                  if (!_isLoading)
+                    RaisedButton(
+                      child: Text(_isLogin ? 'Login' : 'Signup'),
+                      onPressed: _authenticate,
+                    )
+                  else
+                    Center(
+                      child: CircularProgressIndicator(),
+                    ),
                   FlatButton(
                     child: Text('${_isLogin ? 'Signup' : 'Login'} instead'),
-                    onPressed: () {
-                      setState(() {
-                        _isLogin = !_isLogin;
-                      });
-                    },
+                    onPressed: _isLoading
+                        ? null
+                        : () {
+                            setState(() {
+                              _isLogin = !_isLogin;
+                            });
+                          },
                   ),
                   FlatButton(
                     child: Text('Continue without an account'),
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                          title: Text('Are you sure?'),
-                          content: Text(
-                              'If you continue without an account, the measurements you take will be saved to your device. Create and acount if you would like to back them up'),
-                          actions: <Widget>[
-                            FlatButton(
-                              child: Text('OK'),
-                              onPressed: () {
-
-                              },
-                            ),
-                            FlatButton(
-                              child: Text('CANCEL'),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            )
-                          ],
-                        ),
-                      );
-                    },
+                    onPressed: _isLoading
+                        ? null
+                        : () {
+                            showDialog(
+                              context: context,
+                              builder: (ctx) => AlertDialog(
+                                title: Text('Are you sure?'),
+                                content: Text(
+                                    'If you continue without an account, the measurements you take will be saved to your device. Create and acount if you would like to back them up'),
+                                actions: <Widget>[
+                                  FlatButton(
+                                    child: Text('OK'),
+                                    onPressed: widget.switchMode,
+                                  ),
+                                  FlatButton(
+                                    child: Text('CANCEL'),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  )
+                                ],
+                              ),
+                            );
+                          },
                   )
                 ],
               ),
