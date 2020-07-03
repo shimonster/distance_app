@@ -1,11 +1,11 @@
-import 'package:distanceapp/helpers/sql_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:latlong/latlong.dart';
 
 import '../../widgets/distances/distances_drawer.dart';
 import '../../providers/categories.dart';
 import '../../providers/distances.dart';
+import '../../widgets/distances/add_distance_widget.dart';
+import '../../widgets/distances/distance_display_widget.dart';
 
 class DistancesScreen extends StatefulWidget {
   @override
@@ -45,35 +45,19 @@ class _DistancesScreenState extends State<DistancesScreen> {
       appBar: AppBar(
         title: Text(category),
       ),
-      body: ListView.builder(
-        itemCount: distances.distances.length,
-        itemBuilder: (ctx, i) => SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: <Widget>[
-              Text(distances.distances[i].name.toString()),
-              SizedBox(
-                width: 10,
-              ),
-              Text(distances.distances[i].time.toString()),
-              SizedBox(
-                width: 10,
-              ),
-              Text(distances.distances[i].distance.toString()),
-              SizedBox(
-                width: 10,
-              ),
-              Text(distances.distances[i].units.toString()),
-              SizedBox(
-                width: 10,
-              ),
-              Text(distances.distances[i].cat.toString()),
-              SizedBox(
-                width: 10,
-              ),
-              Text(distances.distances[i].markers.toString()),
-            ],
+      body: Padding(
+        padding: EdgeInsets.all(10),
+        child: GridView.builder(
+          itemCount: distances.distances.length + 1,
+          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+            mainAxisSpacing: 10,
+            crossAxisSpacing: 10,
+            childAspectRatio: 6 / 5,
+            maxCrossAxisExtent: 300,
           ),
+          itemBuilder: (ctx, i) => i != distances.distances.length
+              ? DistanceDisplayWidget()
+              : AddDistanceWidget(),
         ),
       ),
     );

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:test/test.dart';
-import 'package:latlong/latlong.dart';
 
 import './providers/categories.dart';
 import './providers/distances.dart';
 import './screens/auth/auth_screen.dart';
 import './screens/distances/distances_screen.dart';
+import './screens/pickers/add_distance_track_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -78,6 +77,10 @@ class _MyAppState extends State<MyApp> {
                 : snapshot.data == null && _account
                     ? AuthScreen(_switchMode)
                     : DistancesScreen(),
+            routes: {
+              AddDistanceTrackScreen.routeName: (ctx) =>
+                  AddDistanceTrackScreen(),
+            },
           ),
         );
       },
