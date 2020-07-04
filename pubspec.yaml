@@ -32,6 +32,7 @@ dependencies:
   path: ^1.6.4
   maps_toolkit: ^1.1.0+1
   test: ^1.14.1
+  background_locator: ^1.1.10+1
 
 
   # The following adds the Cupertino Icons font to your application.
