@@ -59,7 +59,7 @@ class _MyAppState extends State<MyApp> {
             title: 'Distance App',
             theme: ThemeData(
               primarySwatch: Colors.blue,
-              accentColor: Color.fromARGB(1, 184, 115, 51),
+              accentColor: Color.fromARGB(1000, 184, 115, 51),
               buttonTheme: ButtonTheme.of(context).copyWith(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(100),

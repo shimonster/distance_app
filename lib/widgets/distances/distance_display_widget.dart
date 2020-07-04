@@ -12,9 +12,9 @@ class DistanceDisplayWidget extends StatelessWidget {
           TileLayerOptions(
             urlTemplate: "https://api.tomtom.com/map/1/tile/basic/main/"
                 "{z}/{x}/{y}.png?key={apiKey}",
-            wmsOptions: WMSTileLayerOptions(
-              styles: ['night'],
-            ),
+//            wmsOptions: WMSTileLayerOptions(
+//              styles: ['night'],
+//            ),
             additionalOptions: {
               'apiKey': 'kNNg2Al5OGZUWcCpC0MeaoCQeCCeNzrl',
             },

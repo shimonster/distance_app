@@ -87,10 +87,15 @@ class Distances extends ChangeNotifier {
     return result;
   }
 
-  Future<void> addDistance(String name, DateTime time, String units,
-      String category, List<Map<String, dynamic>> markers) async {
+  Future<void> addDistance(
+      String name,
+      DateTime time,
+      String units,
+      String category,
+      List<Map<String, dynamic>> markers,
+      double distance) async {
     try {
-      final distance = computeTotalDist(markers);
+      //final distance = computeTotalDist(markers);
       if (uid != null) {
         final result =
             await addToDatabase(name, time, units, category, markers, distance);

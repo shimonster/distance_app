@@ -28,7 +28,7 @@ class AddDistanceWidget extends StatelessWidget {
                   width: 15,
                 ),
                 SizedBox(
-                  width: 200,
+                  width: 100,
                   child: Text(
                     name,
                     overflow: TextOverflow.clip,
