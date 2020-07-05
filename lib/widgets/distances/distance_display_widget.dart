@@ -9,22 +9,12 @@ class DistanceDisplayWidget extends StatelessWidget {
       child: FlutterMap(
         options: MapOptions(interactive: false, center: LatLng(0, 0)),
         layers: [
-          TileLayerOptions(
-            urlTemplate: "https://api.tomtom.com/map/1/tile/basic/main/"
-                "{z}/{x}/{y}.png?key={apiKey}",
-//            wmsOptions: WMSTileLayerOptions(
-//              styles: ['night'],
-//            ),
-            additionalOptions: {
-              'apiKey': 'kNNg2Al5OGZUWcCpC0MeaoCQeCCeNzrl',
-            },
-          ),
+          TileLayerOptions(),
         ],
       ),
       footer: GridTileBar(
         title: Text('Add Distance'),
       ),
     );
-    ;
   }
 }

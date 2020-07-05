@@ -32,6 +32,7 @@ class Distances extends ChangeNotifier {
   Distances(this.uid, this.categories, [this._distances]);
 
   final String uid;
+//  final String preferredUnit;
   final List<String> categories;
   List<Distance> _distances = [];
 

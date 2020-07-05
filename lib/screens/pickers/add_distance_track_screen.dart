@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'dart:isolate';
 
+import 'package:background_locator/location_settings.dart' as ls;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:location/location.dart';
@@ -23,27 +24,48 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
   List<Map<String, dynamic>> _points = [];
   bool _isAtLastPoint = true;
   bool _isLoading = false;
+  bool _hasDisposed = false;
   final MapController _mapController = MapController();
   final Distance distance = Distance();
   static const _isolateName = 'LocationIsolate';
   ReceivePort port = ReceivePort();
+  Stream _locationStream;
+
+  static const _distanceFilter = 5.0;
+  static const _interval = 3;
+  static const _initialZoom = 18.0;
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.paused) {
+      print('paused');
       _startBackgroundLocation();
     } else {
+      print('other');
       IsolateNameServer.removePortNameMapping(_isolateName);
       BackgroundLocator.unRegisterLocationUpdate();
     }
   }
 
   @override
+  void dispose() {
+    _hasDisposed = true;
+    IsolateNameServer.removePortNameMapping(_isolateName);
+    BackgroundLocator.unRegisterLocationUpdate();
+    _locationStream = null;
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
+    _locationStream = Location().onLocationChanged;
+    _locationStream.listen((event) => _hasDisposed ? null : _addPoint(event));
     IsolateNameServer.registerPortWithName(port.sendPort, _isolateName);
-    port.listen((dynamic data) => _addPoint(data));
+    port.listen((dynamic data) {
+      _addPoint(data);
+    });
     initPlatformState();
     Location().requestPermission();
     setState(() {
@@ -57,7 +79,9 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
       });
     });
     Location().changeSettings(
-        interval: 3000, distanceFilter: 10, accuracy: LocationAccuracy.high);
+        interval: _interval * 1000,
+        distanceFilter: _distanceFilter,
+        accuracy: LocationAccuracy.high);
   }
 
   Future<void> initPlatformState() async {
@@ -70,11 +94,17 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
   }
 
   void _startBackgroundLocation() {
-    BackgroundLocator.registerLocationUpdate(backgroundLocationCallback);
+    BackgroundLocator.registerLocationUpdate(
+      backgroundLocationCallback,
+      settings: ls.LocationSettings(
+        distanceFilter: _distanceFilter,
+        interval: _interval,
+      ),
+    );
   }
 
   void _addPoint(dynamic loc) {
-    print(loc.accuracy);
+    print(_points.length);
     final ptLoc = {
       'LatLng': LatLng(loc.latitude, loc.longitude),
       'alt': loc.altitude
@@ -86,9 +116,11 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
     } else {
       _points.add(ptLoc);
     }
-    //if (_isAtLastPoint) {
-    _mapController.move(_points.last['LatLng'], 15);
-    //}
+    if (_isAtLastPoint) {
+      if (_mapController.ready) {
+        _mapController.move(_points.last['LatLng'], _mapController.zoom);
+      }
+    }
   }
 
   Marker _buildMarker(LatLng point) {
@@ -104,69 +136,94 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: StreamBuilder(
-      stream: Location().onLocationChanged..listen((event) => _addPoint(event)),
-      builder: (ctx, snapshot) => _points.isEmpty
-          ? Center(
-              child: Text('Loding...'),
-            )
-          : Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Expanded(
-                  child: _isLoading
-                      ? Center(
-                          child: CircularProgressIndicator(),
-                        )
-                      : FlutterMap(
-                          mapController: _mapController,
-                          options: MapOptions(
-                            center: snapshot.data == null
-                                ? null
-                                : LatLng(snapshot.data.latitude,
-                                    snapshot.data.longitude),
-                            zoom: 15,
-                            onPositionChanged: (pos, _) {
-                              if (_points.isNotEmpty) {
-                                if (pos.center != _points.last['LatLng']) {
-                                  _isAtLastPoint = false;
+      body: StreamBuilder(
+        stream: _locationStream,
+        builder: (ctx, snapshot) => _points.isEmpty
+            ? Center(
+                child: Text('Loding...'),
+              )
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Expanded(
+                    child: _isLoading
+                        ? Center(
+                            child: CircularProgressIndicator(),
+                          )
+                        : FlutterMap(
+                            mapController: _mapController,
+                            options: MapOptions(
+                              center: LatLng(10, 10), //snapshot.data == null
+//                                  ? null
+//                                  : LatLng(snapshot.data.latitude,
+//                                      snapshot.data.longitude),
+                              zoom: _initialZoom,
+                              onPositionChanged: (pos, _) {
+                                if (_points.isNotEmpty) {
+                                  if (pos.center != _points.last['LatLng']) {
+                                    _isAtLastPoint = false;
+                                  }
                                 }
-                              }
-                            },
-                          ),
-                          layers: [
-                            TileLayerOptions(
-                              urlTemplate:
-                                  "https://api.tomtom.com/map/1/tile/basic/main/"
-                                  "{z}/{x}/{y}.png?key={apiKey}",
-                              additionalOptions: {
-                                'apiKey': 'kNNg2Al5OGZUWcCpC0MeaoCQeCCeNzrl',
                               },
                             ),
-                            MarkerLayerOptions(
-                              markers: _points
-                                  .map((e) => _buildMarker(e['LatLng']))
-                                  .toList(),
-                            ),
-                          ],
+                            layers: [
+                              new TileLayerOptions(
+                                  urlTemplate:
+                                      "http://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
+                                  subdomains: ['a', 'b', 'c']),
+                              MarkerLayerOptions(
+                                markers: _points
+                                    .map((e) => _buildMarker(e['LatLng']))
+                                    .toList(),
+                              ),
+                            ],
+                          ),
+                  ),
+                  Container(
+                    width: double.infinity,
+                    height: 50,
+                    color: Theme.of(context).primaryColorLight,
+                    child: Center(
+                      child: Text(
+                        'Current Distance: ${Provider.of<ds.Distances>(context, listen: false).computeTotalDist(_points)}',
+                        style: TextStyle(
+                          color: Theme.of(context).accentColor,
+                          fontSize: 17,
                         ),
-                ),
-                Container(
-                  width: double.infinity,
-                  height: 50,
-                  color: Theme.of(context).primaryColorLight,
-                  child: Center(
-                    child: Text(
-                      'Current Distance: ${Provider.of<ds.Distances>(context, listen: false).computeTotalDist(_points)}',
-                      style: TextStyle(
-                        color: Theme.of(context).accentColor,
-                        fontSize: 17,
                       ),
                     ),
-                  ),
-                )
-              ],
-            ),
-    ));
+                  )
+                ],
+              ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: InkWell(
+        onTap: () {},
+        borderRadius: BorderRadius.circular(100),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 11, vertical: 8),
+          decoration: BoxDecoration(
+            color: Theme.of(context).accentColor,
+            borderRadius: BorderRadius.circular(100),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Icon(
+                Icons.check,
+                color: Colors.white,
+              ),
+              SizedBox(
+                width: 10,
+              ),
+              Text(
+                'Finish',
+                style: TextStyle(color: Colors.white),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

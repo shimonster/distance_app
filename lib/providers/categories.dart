@@ -35,7 +35,7 @@ class Categories extends ChangeNotifier {
       if (uid != null) {
         print('firebase');
         final cats = await Firestore.instance.document('users/$uid').get();
-        _categories = cats.data['categories'];
+        _categories = cats.data == null ? _categories : cats.data['categories'];
       } else {
         print('devise');
         _categories = await SQLHelper.getCategories(uid ?? '');

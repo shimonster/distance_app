@@ -31,9 +31,8 @@ class _DistancesScreenState extends State<DistancesScreen> {
   }
 
   Future<void> addCategory(TextEditingController _name) {
-    return Provider.of<Categories>(context)
-        .addCategory(_name.text)
-        .then((value) {});
+    return Provider.of<Categories>(context, listen: false)
+        .addCategory(_name.text);
   }
 
   @override

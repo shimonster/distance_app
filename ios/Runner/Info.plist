@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    <key>AccessKeyId</key>
+    <string>59uhJkeuhVRhvoHtiGdMog</string>
+    <key>AccessKeySecret</key>
+    <string>8PBzRWIvLC_Q8x0PDRcoe3OpDWn4gCyKVGMjqIv1bkEJrgB5zXWme6udhAYMQ9HVyo65WcwoexkKX2yVfn_E0w</string>
     <key>NSLocationAlwaysUsageDescription</key>
 	<string>Would you like to let this app access your location?</string>
     <key>NSLocationWhenInUseUsageDescription</key>
