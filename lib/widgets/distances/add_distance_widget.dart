@@ -6,63 +6,11 @@ import '../../screens/pickers/add_distance_track_screen.dart';
 class AddDistanceWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    Widget _buildAddOption(
-            IconData icon, String name, BuildContext context, bool isTrack) =>
-        InkWell(
-          splashColor: Theme.of(context).primaryColorLight,
-          onTap: () {
-            if (isTrack) {
-              Navigator.of(context).pushNamed(AddDistanceTrackScreen.routeName);
-            } else {
-              Navigator.of(context).pushNamed('PLACE HOLDER');
-            }
-          },
-          child: Container(
-            child: Row(
-              children: <Widget>[
-                Icon(
-                  icon,
-                  color: Theme.of(context).primaryColor,
-                ),
-                SizedBox(
-                  width: 15,
-                ),
-                SizedBox(
-                  width: 100,
-                  child: Text(
-                    name,
-                    overflow: TextOverflow.clip,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
       child: InkWell(
         onTap: () {
-          showDialog(
-            context: context,
-            builder: (ctx) => AlertDialog(
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  _buildAddOption(
-                      Icons.timeline,
-                      'A-B-C - Calculated distance between selected pointss',
-                      context,
-                      false),
-                  Divider(),
-                  _buildAddOption(
-                      Icons.trending_up,
-                      'Track - Tracks the distance you travelled',
-                      context,
-                      true),
-                ],
-              ),
-            ),
-          );
+          Navigator.of(context).pushNamed(AddDistanceTrackScreen.routeName);
         },
         child: GridTile(
           child: Stack(

@@ -101,7 +101,7 @@ class Distances extends ChangeNotifier {
         final result =
             await addToDatabase(name, time, units, category, markers, distance);
         SQLHelper.addDistance(
-            result.documentID, name, units, category, markers, uid ?? '');
+            result.documentID, name, units, category, markers, uid);
         _distances.add(
           Distance(
             id: result.documentID,
@@ -117,7 +117,7 @@ class Distances extends ChangeNotifier {
         );
       } else {
         SQLHelper.addDistance(
-            time.toIso8601String(), name, units, category, markers, uid ?? '');
+            time.toIso8601String(), name, units, category, markers, '');
         _distances.add(
           Distance(
             id: time.toIso8601String(),

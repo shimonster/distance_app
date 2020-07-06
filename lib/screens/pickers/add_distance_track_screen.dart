@@ -7,12 +7,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:location/location.dart';
 import 'package:latlong/latlong.dart';
-import 'package:provider/provider.dart';
 import 'package:background_locator/background_locator.dart';
 import 'package:background_locator/location_dto.dart';
+import 'package:provider/provider.dart';
 
-import '../../providers/distances.dart' as ds;
 import '../../widgets/distances/track_distance_floating_action_button.dart';
+import '../../widgets/distances/track_distance_bottom_sheet.dart';
+import '../../providers/distances.dart' as d;
 
 class AddDistanceTrackScreen extends StatefulWidget {
   static const routeName = '/add_distance_track_screen';
@@ -33,8 +34,8 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
   ReceivePort port = ReceivePort();
   Stream _locationStream;
 
-  static const _distanceFilter = 5.0;
-  static const _interval = 3;
+  static const _distanceFilter = 10.0;
+  static const _interval = 10;
   static const _initialZoom = 18.0;
 
   @override
@@ -71,10 +72,18 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
             : _addPoint(
                 {
                   'LatLng': LatLng(event.latitude, event.longitude),
-                  'alt': 100, //event.altitude
+                  'alt': event.altitude, //event.altitude
                 },
               ),
       );
+    Location().getLocation().then(
+          (value) => _addPoint(
+            {
+              'LatLng': LatLng(value.latitude, value.longitude),
+              'alt': value.altitude, //event.altitude
+            },
+          ),
+        );
     Location().requestPermission();
     Location().changeSettings(
         interval: _interval * 1000,
@@ -107,15 +116,26 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
   }
 
   void _addPoint(Map<String, dynamic> loc) {
+    final addMap = _points.isEmpty
+        ? {
+            ...loc,
+            'time': DateTime.now(),
+          }
+        : {
+            'delta_lat': loc['LatLng'].latitude - _points.last['LatLng'],
+            'time': DateTime.now(),
+          };
     print(_points.length);
     if (_points.isNotEmpty) {
       if (_points.last != loc) {
-        print([loc, _points.last]);
-        _points.add(loc);
+        setState(() {
+          _points.add(loc);
+        });
       }
     } else {
-      print('pity add');
-      _points.add(loc);
+      setState(() {
+        _points.add(loc);
+      });
     }
     if (_isAtLastPoint) {
       if (_mapController.ready) {
@@ -163,6 +183,7 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
                         : FlutterMap(
                             mapController: _mapController,
                             options: MapOptions(
+                              maxZoom: 19,
                               center: _points.last['LatLng'],
                               zoom: _initialZoom,
                               onPositionChanged: (pos, _) {
@@ -202,68 +223,7 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
       floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
       floatingActionButton: TrackDistanceFloatingActionButton(
           mapController: _mapController, points: _points),
-      bottomSheet: Container(
-        width: double.infinity,
-        height: 70,
-        color: Theme.of(context).primaryColorLight,
-        child: Row(
-          children: <Widget>[
-            Expanded(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    Text(
-                      'Current Distance: ${Provider.of<ds.Distances>(context, listen: false).computeTotalDist(_points)}',
-                      style: TextStyle(
-                        color: Theme.of(context).accentColor,
-                        fontSize: 17,
-                      ),
-                    ),
-                    Text(
-                      'Points: ${_points.length}',
-                      style: TextStyle(
-                        color: Theme.of(context).accentColor,
-                        fontSize: 17,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 8, horizontal: 15),
-              child: InkWell(
-                onTap: () {},
-                borderRadius: BorderRadius.circular(100),
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 11, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).accentColor,
-                    borderRadius: BorderRadius.circular(100),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Icon(
-                        Icons.check,
-                        color: Colors.white,
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Text(
-                        'Finish',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+      bottomSheet: TrackDistanceBottomSheet(points: _points),
     );
   }
 }
