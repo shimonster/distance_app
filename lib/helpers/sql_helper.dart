@@ -35,24 +35,28 @@ class SQLHelper {
 
   static Future<void> addCategory(String name, String uid) async {
     final Database db = await categoryDbSetup(uid);
-    final id = await db.insert(
-      'UserCategories',
+    await db.insert(
+      '${uid}Categories',
       {'title': name},
-      conflictAlgorithm: ConflictAlgorithm.ignore,
+      conflictAlgorithm: ConflictAlgorithm.rollback,
     );
   }
 
   static Future<List> getCategories(String uid) async {
+    print('geting cats');
     final db = await categoryDbSetup(uid);
-    final cats = await db.query('', columns: ['title']);
-    return cats;
+    final cats = await db.query('${uid}Categories', columns: ['title']);
+    List listCats = [];
+    cats.forEach((element) => listCats.add(element['title']));
+    print(cats);
+    return listCats;
   }
 
   static Future<void> addDistance(String id, String name, String units,
       String category, List<Map<String, dynamic>> points, String uid) async {
     final Database db = await distanceDbSetup(uid);
     points.forEach((point) {
-      db.insert('UserDistancesPoints', {
+      db.insert('${uid}Distances', {
         'id': id + point['time'].toString(),
         'name': name,
         'cat': category,
@@ -69,7 +73,7 @@ class SQLHelper {
     Map<String, List<Map>> pointList = {};
     List<Distance> distances = [];
     final points =
-        await db.query('UserDistancesPoints', groupBy: 'id', orderBy: 'time');
+        await db.query('${uid}Distances', groupBy: 'id', orderBy: 'time');
     points.forEach((Map<dynamic, dynamic> point) {
       if (pointList.containsKey(point['id'])) {
         pointList[point['id']].add(point);

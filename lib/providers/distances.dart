@@ -97,11 +97,23 @@ class Distances extends ChangeNotifier {
       double distance) async {
     try {
       //final distance = computeTotalDist(markers);
+      final newMarks = markers.map((e) => {
+            'LatLng': LatLng(
+                e['LatLng'].latitude * 1000000, e['LatLng'].latitude * 1000000),
+            'alt': e['alt'],
+            'time': e['time'].toString(),
+          });
+      final databaseMarks = newMarks.map((e) => {
+            'lat': e['LatLng'].latitude,
+            'lng': e['LatLng'].longitude,
+            'alt': e['alt'],
+            'time': e['time'].toString()
+          });
       if (uid != null) {
-        final result =
-            await addToDatabase(name, time, units, category, markers, distance);
+        final result = await addToDatabase(
+            name, time, units, category, databaseMarks, distance);
         SQLHelper.addDistance(
-            result.documentID, name, units, category, markers, uid);
+            result.documentID, name, units, category, newMarks, uid);
         _distances.add(
           Distance(
             id: result.documentID,
@@ -149,7 +161,7 @@ class Distances extends ChangeNotifier {
         List<Distance> loadedDistances = [];
         result.documents.forEach((dist) {
           final List marks = dist.data['markers'].map((mar) {
-            return LatLng(mar['lat'], mar['lng']);
+            return LatLng(mar['lat'] / 1000000, mar['lng'] / 1000000);
           }).toList();
           loadedDistances.add(
             Distance(

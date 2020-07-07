@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong/latlong.dart';
 
-class TrackDistanceFloatingActionButton extends StatelessWidget {
+class TrackDistanceFloatingActionButton extends StatefulWidget {
   const TrackDistanceFloatingActionButton({
     Key key,
     @required MapController mapController,
@@ -14,6 +15,64 @@ class TrackDistanceFloatingActionButton extends StatelessWidget {
   final List<Map<String, dynamic>> _points;
 
   @override
+  _TrackDistanceFloatingActionButtonState createState() =>
+      _TrackDistanceFloatingActionButtonState();
+}
+
+class _TrackDistanceFloatingActionButtonState
+    extends State<TrackDistanceFloatingActionButton>
+    with TickerProviderStateMixin {
+  Animation<double> _latAnimation;
+  Animation<double> _lngAnimation;
+  AnimationController _animController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animController = AnimationController(
+      vsync: this,
+    );
+  }
+
+  void _setAnims() {
+    final bool wasNull = _latAnimation == null;
+    _animController.duration = Duration(
+      milliseconds: Distance()
+          .as(LengthUnit.Meter, widget._mapController.center,
+              widget._points.last['LatLng'])
+          .round(),
+    );
+    if (widget._mapController.ready) {
+      _latAnimation = Tween<double>(
+        begin: widget._mapController.center.latitude,
+        end: widget._points.last['LatLng'].latitude,
+      ).animate(
+        CurvedAnimation(
+          parent: _animController,
+          curve: Curves.easeIn,
+        ),
+      );
+      _lngAnimation = Tween<double>(
+        begin: widget._mapController.center.longitude,
+        end: widget._points.last['LatLng'].longitude,
+      ).animate(
+        CurvedAnimation(
+          parent: _animController,
+          curve: Curves.easeOut,
+        ),
+      );
+      if (wasNull) {
+        print('added listener');
+        _latAnimation.addListener(() {
+          widget._mapController.move(
+              LatLng(_latAnimation.value, _lngAnimation.value),
+              widget._mapController.zoom);
+        });
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(top: 120, right: 25),
@@ -21,6 +80,7 @@ class TrackDistanceFloatingActionButton extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           FloatingActionButton(
+            heroTag: 'Back button',
             child: Icon(Icons.arrow_back),
             onPressed: () {
               showDialog(
@@ -49,9 +109,12 @@ class TrackDistanceFloatingActionButton extends StatelessWidget {
             },
           ),
           FloatingActionButton(
+            heroTag: 'Go to location button',
             child: Icon(Icons.my_location),
             onPressed: () {
-              _mapController.move(_points.last['LatLng'], _mapController.zoom);
+              _setAnims();
+              _animController.reset();
+              _animController.forward();
               //_isAtLastPoint = true;
             },
           ),

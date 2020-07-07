@@ -72,7 +72,7 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
             : _addPoint(
                 {
                   'LatLng': LatLng(event.latitude, event.longitude),
-                  'alt': event.altitude, //event.altitude
+                  'alt': event.altitude //event.altitude
                 },
               ),
       );
@@ -80,7 +80,7 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
           (value) => _addPoint(
             {
               'LatLng': LatLng(value.latitude, value.longitude),
-              'alt': value.altitude, //event.altitude
+              'alt': value.altitude //event.altitude
             },
           ),
         );
@@ -116,13 +116,14 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
   }
 
   void _addPoint(Map<String, dynamic> loc) {
+    print(_points);
     final addMap = _points.isEmpty
         ? {
             ...loc,
             'time': DateTime.now(),
           }
         : {
-            'delta_lat': loc['LatLng'].latitude - _points.last['LatLng'],
+            //'delta_lat': loc['LatLng'].latitude - _points.first['LatLng'],
             'time': DateTime.now(),
           };
     print(_points.length);

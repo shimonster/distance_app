@@ -1,6 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+
+import '../../providers/categories.dart';
 
 class AuthCard extends StatefulWidget {
   AuthCard(this.switchMode);
@@ -20,6 +23,7 @@ class _AuthCardState extends State<AuthCard> {
   bool _isLoading = false;
 
   Future<void> _authenticate() async {
+    print('authenticating');
     final auth = FirebaseAuth.instance;
     if (_form.currentState.validate()) {
       try {
@@ -28,18 +32,20 @@ class _AuthCardState extends State<AuthCard> {
         });
         _form.currentState.save();
         if (_isLogin) {
-          auth.signInWithEmailAndPassword(email: email, password: password);
+          await auth.signInWithEmailAndPassword(
+              email: email, password: password);
         } else {
-          auth.createUserWithEmailAndPassword(email: email, password: password);
+          final result = await auth.createUserWithEmailAndPassword(
+              email: email, password: password);
+          await Provider.of<Categories>(context, listen: false)
+              .putInitialCategories(result.user.uid);
         }
-        setState(() {
-          _isLoading = false;
-        });
+        await Provider.of<Categories>(context, listen: false).getCategories();
       } on PlatformException catch (error) {
         Scaffold.of(context).hideCurrentSnackBar();
         Scaffold.of(context).showSnackBar(
           SnackBar(
-            content: Text(error.toString()),
+            content: Text(error.message),
           ),
         );
       } catch (error) {
@@ -50,6 +56,9 @@ class _AuthCardState extends State<AuthCard> {
           ),
         );
       }
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -118,11 +127,8 @@ class _AuthCardState extends State<AuthCard> {
                     RaisedButton(
                       child: Text(_isLogin ? 'Login' : 'Signup'),
                       onPressed: _authenticate,
-                    )
-                  else
-                    Center(
-                      child: CircularProgressIndicator(),
                     ),
+                  if (_isLoading) CircularProgressIndicator(),
                   FlatButton(
                     child: Text('${_isLogin ? 'Signup' : 'Login'} instead'),
                     onPressed: _isLoading
@@ -147,7 +153,16 @@ class _AuthCardState extends State<AuthCard> {
                                 actions: <Widget>[
                                   FlatButton(
                                     child: Text('OK'),
-                                    onPressed: widget.switchMode,
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                      widget.switchMode();
+                                      Provider.of<Categories>(context,
+                                              listen: false)
+                                          .putInitialCategories();
+                                      Provider.of<Categories>(context,
+                                              listen: false)
+                                          .getCategories();
+                                    },
                                   ),
                                   FlatButton(
                                     child: Text('CANCEL'),

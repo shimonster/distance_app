@@ -30,17 +30,12 @@ class _DistancesScreenState extends State<DistancesScreen> {
     });
   }
 
-  Future<void> addCategory(TextEditingController _name) {
-    return Provider.of<Categories>(context, listen: false)
-        .addCategory(_name.text);
-  }
-
   @override
   Widget build(BuildContext context) {
     final distances = Provider.of<Distances>(context);
 
     return Scaffold(
-      drawer: DistanceDrawer(_selectCategory, addCategory),
+      drawer: DistanceDrawer(_selectCategory),
       appBar: AppBar(
         title: Text(category),
       ),
