@@ -192,9 +192,10 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
                             ),
                             layers: [
                               new TileLayerOptions(
-                                  urlTemplate:
-                                      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                                  subdomains: ['a', 'b', 'c']),
+                                urlTemplate:
+                                    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                                subdomains: ['a', 'b', 'c'],
+                              ),
                               MarkerLayerOptions(
 //                                  markers: _points.expand((element) {
 //                                final List<Marker> markers = [];

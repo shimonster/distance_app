@@ -153,10 +153,10 @@ class Distances extends ChangeNotifier {
         List<Distance> loadedDistances = [];
         result.documents.forEach((dist) {
           final List<Map<String, dynamic>> marks = dist.data['markers']
-              .map((mar) => {
-                    'LatLng':
-                        LatLng(mar['lat'] / 100000000, mar['lng'] / 100000000),
+              .map<Map<String, dynamic>>((mar) => {
+                    'LatLng': LatLng(mar['lat'], mar['lng']),
                     'alt': mar['alt'],
+                    'time': DateTime.parse(mar['time'])
                   })
               .toList();
           loadedDistances.add(

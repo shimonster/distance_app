@@ -50,7 +50,7 @@ class _DistancesScreenState extends State<DistancesScreen> {
             maxCrossAxisExtent: 300,
           ),
           itemBuilder: (ctx, i) => i != distances.distances.length
-              ? DistanceDisplayWidget()
+              ? DistanceDisplayWidget(distances.distances[i])
               : AddDistanceWidget(),
         ),
       ),

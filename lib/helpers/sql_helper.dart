@@ -88,8 +88,8 @@ class SQLHelper {
       value.forEach((element) {
         if (prevPoint != null) {
           final flatDis = SphericalUtil.computeLength([
-            LatLng(prevPoint['lat'], prevPoint['lng']),
-            LatLng(element['lat'], element['lng']),
+            LatLng(prevPoint['lat'] / 100000000, prevPoint['lng'] / 100000000),
+            LatLng(element['lat'] / 100000000, element['lng'] / 100000000),
           ]);
           distance +=
               sqrt(pow(flatDis, 2) + pow(element['alt'] - prevPoint['alt'], 2));
@@ -102,8 +102,12 @@ class SQLHelper {
         time: DateTime.parse(value[0]['time']),
         distance: distance,
         markers: value
-            .map((e) =>
-                {'LatLng': ll.LatLng(e['lat'], e['lng']), 'alt': e['alt']})
+            .map((e) => {
+                  'LatLng':
+                      ll.LatLng(e['lat'] / 100000000, e['lng'] / 100000000),
+                  'alt': e['alt'],
+                  'time': DateTime.parse(e['time'])
+                })
             .toList(),
         cat: value[0]['cat'],
         units: 'meters',
