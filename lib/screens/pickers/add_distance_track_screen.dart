@@ -116,26 +116,21 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
   }
 
   void _addPoint(Map<String, dynamic> loc) {
-    print(_points);
-    final addMap = _points.isEmpty
-        ? {
-            ...loc,
-            'time': DateTime.now(),
-          }
-        : {
-            //'delta_lat': loc['LatLng'].latitude - _points.first['LatLng'],
-            'time': DateTime.now(),
-          };
+    print('length of points: $_points');
+    final addMap = {
+      ...loc,
+      'time': DateTime.now(),
+    };
     print(_points.length);
     if (_points.isNotEmpty) {
-      if (_points.last != loc) {
+      if (_points.last != addMap) {
         setState(() {
-          _points.add(loc);
+          _points.add(addMap);
         });
       }
     } else {
       setState(() {
-        _points.add(loc);
+        _points.add(addMap);
       });
     }
     if (_isAtLastPoint) {
@@ -198,7 +193,7 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
                             layers: [
                               new TileLayerOptions(
                                   urlTemplate:
-                                      "http://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
+                                      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
                                   subdomains: ['a', 'b', 'c']),
                               MarkerLayerOptions(
 //                                  markers: _points.expand((element) {

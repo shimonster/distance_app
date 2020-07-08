@@ -6,15 +6,15 @@ class DistanceDisplayWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GridTile(
-      child: FlutterMap(
-        options: MapOptions(interactive: false, center: LatLng(0, 0)),
-        layers: [
-          TileLayerOptions(),
-        ],
-      ),
-      footer: GridTileBar(
-        title: Text('Add Distance'),
-      ),
-    );
+//      child: FlutterMap(
+//        options: MapOptions(interactive: false, center: LatLng(0, 0)),
+//        layers: [
+//          TileLayerOptions(),
+//        ],
+//      ),
+//      footer: GridTileBar(
+//        title: Text('Add Distance'),
+//      ),
+        );
   }
 }

@@ -48,6 +48,9 @@ class _AuthCardState extends State<AuthCard> {
             content: Text(error.message),
           ),
         );
+        setState(() {
+          _isLoading = false;
+        });
       } catch (error) {
         Scaffold.of(context).hideCurrentSnackBar();
         Scaffold.of(context).showSnackBar(
@@ -55,10 +58,10 @@ class _AuthCardState extends State<AuthCard> {
             content: Text('Something went wrong while trying authenticate you'),
           ),
         );
+        setState(() {
+          _isLoading = false;
+        });
       }
-      setState(() {
-        _isLoading = false;
-      });
     }
   }
 

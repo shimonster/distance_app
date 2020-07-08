@@ -27,7 +27,7 @@ class SQLHelper {
       onCreate: (db, _) {
         return db.execute(
           'CREATE TABLE ${uid}Categories'
-          '(id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT)',
+          '(title TEXT PRIMARY KEY)',
         );
       },
     );
@@ -38,17 +38,18 @@ class SQLHelper {
     await db.insert(
       '${uid}Categories',
       {'title': name},
-      conflictAlgorithm: ConflictAlgorithm.rollback,
+      conflictAlgorithm: ConflictAlgorithm.abort,
     );
   }
 
   static Future<List> getCategories(String uid) async {
     print('geting cats');
     final db = await categoryDbSetup(uid);
-    final cats = await db.query('${uid}Categories', columns: ['title']);
+    final cats =
+        await db.query('${uid}Categories', columns: ['title'], distinct: true);
     List listCats = [];
     cats.forEach((element) => listCats.add(element['title']));
-    print(cats);
+    print('recieved cats: $cats');
     return listCats;
   }
 
@@ -61,8 +62,8 @@ class SQLHelper {
         'name': name,
         'cat': category,
         'time': point['time'].toString(),
-        'lat': point['LatLng'].latitude,
-        'lng': point['LatLng'].longitude,
+        'lat': point['lat'],
+        'lng': point['lng'],
         'alt': point['alt'],
       });
     });
@@ -100,7 +101,10 @@ class SQLHelper {
         name: value[0]['name'],
         time: DateTime.parse(value[0]['time']),
         distance: distance,
-        markers: value.map((e) => ll.LatLng(e['lat'], e['lng'])).toList(),
+        markers: value
+            .map((e) =>
+                {'LatLng': ll.LatLng(e['lat'], e['lng']), 'alt': e['alt']})
+            .toList(),
         cat: value[0]['cat'],
         units: 'meters',
       ));

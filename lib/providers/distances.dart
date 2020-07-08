@@ -25,14 +25,14 @@ class Distance {
   final double distance;
   final String units;
   final String cat;
-  final List markers;
+  final List<Map<String, dynamic>> markers;
 }
 
 class Distances extends ChangeNotifier {
   Distances(this.uid, this.categories, [this._distances]);
 
   final String uid;
-//  final String preferredUnit;
+  final String preferredUnit = 'Meters';
   final List<String> categories;
   List<Distance> _distances = [];
 
@@ -97,21 +97,17 @@ class Distances extends ChangeNotifier {
       double distance) async {
     try {
       //final distance = computeTotalDist(markers);
-      final newMarks = markers.map((e) => {
-            'LatLng': LatLng(
-                e['LatLng'].latitude * 1000000, e['LatLng'].latitude * 1000000),
-            'alt': e['alt'],
-            'time': e['time'].toString(),
-          });
-      final databaseMarks = newMarks.map((e) => {
-            'lat': e['LatLng'].latitude,
-            'lng': e['LatLng'].longitude,
-            'alt': e['alt'],
-            'time': e['time'].toString()
-          });
+      final newMarks = markers
+          .map((e) => {
+                'lat': (e['LatLng'].latitude * 100000000).round(),
+                'lng': (e['LatLng'].longitude * 100000000).round(),
+                'alt': e['alt'],
+                'time': e['time'].toString(),
+              })
+          .toList();
       if (uid != null) {
-        final result = await addToDatabase(
-            name, time, units, category, databaseMarks, distance);
+        final result =
+            await addToDatabase(name, time, units, category, markers, distance);
         SQLHelper.addDistance(
             result.documentID, name, units, category, newMarks, uid);
         _distances.add(
@@ -122,9 +118,7 @@ class Distances extends ChangeNotifier {
             distance: distance,
             units: units,
             cat: category,
-            markers: markers
-                .map((e) => LatLng(e['LatLng'].latitude, e['LatLng'].longitude))
-                .toList(),
+            markers: markers,
           ),
         );
       } else {
@@ -138,9 +132,7 @@ class Distances extends ChangeNotifier {
             distance: distance,
             units: units,
             cat: category,
-            markers: markers
-                .map((e) => LatLng(e['LatLng'].latitude, e['LatLng'].longitude))
-                .toList(),
+            markers: markers,
           ),
         );
       }
@@ -160,9 +152,13 @@ class Distances extends ChangeNotifier {
             .getDocuments();
         List<Distance> loadedDistances = [];
         result.documents.forEach((dist) {
-          final List marks = dist.data['markers'].map((mar) {
-            return LatLng(mar['lat'] / 1000000, mar['lng'] / 1000000);
-          }).toList();
+          final List<Map<String, dynamic>> marks = dist.data['markers']
+              .map((mar) => {
+                    'LatLng':
+                        LatLng(mar['lat'] / 100000000, mar['lng'] / 100000000),
+                    'alt': mar['alt'],
+                  })
+              .toList();
           loadedDistances.add(
             Distance(
               id: dist.documentID,
