@@ -18,14 +18,15 @@ class Categories extends ChangeNotifier {
     print('putting in intitial cats');
     try {
       if (userId != null) {
-        print('add with firestor');
         await Firestore.instance
             .document('users/$userId')
             .setData({'categories': _categories});
       }
       _categories.forEach((element) async {
-        await SQLHelper.addCategory(element, userId ?? '');
+        await SQLHelper.addCategory(
+            element, userId ?? '', _categories.indexOf(element));
       });
+      notifyListeners();
     } catch (error) {
       throw error;
     }
@@ -34,12 +35,11 @@ class Categories extends ChangeNotifier {
   Future<void> addCategory(String title) async {
     try {
       if (uid != null) {
-        print('add with firestor');
-        await Firestore.instance.document('users/$uid').updateData({
+        await Firestore.instance.document('users/$uid').setData({
           'categories': [..._categories, title]
         });
       }
-      await SQLHelper.addCategory(title, uid ?? '');
+      await SQLHelper.addCategory(title, uid ?? '', categories.length);
       _categories.add(title);
     } catch (error) {
       throw error;

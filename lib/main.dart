@@ -76,7 +76,7 @@ class _MyAppState extends State<MyApp> {
                   )
                 : snapshot.data == null && _account
                     ? AuthScreen(_switchMode)
-                    : DistancesScreen(),
+                    : DistancesScreen(_switchMode),
             routes: {
               AddDistanceTrackScreen.routeName: (ctx) =>
                   AddDistanceTrackScreen(),

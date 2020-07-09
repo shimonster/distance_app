@@ -6,9 +6,10 @@ import 'package:provider/provider.dart';
 import '../../providers/categories.dart';
 
 class DistanceDrawer extends StatefulWidget {
-  DistanceDrawer(this.selectCategory);
+  DistanceDrawer(this.selectCategory, this.switchMode);
 
   final void Function(String cat) selectCategory;
+  final void Function() switchMode;
 
   @override
   _DistanceDrawerState createState() => _DistanceDrawerState();
@@ -60,6 +61,9 @@ class _DistanceDrawerState extends State<DistanceDrawer> {
                 icon: Icon(Icons.exit_to_app),
                 onPressed: () {
                   FirebaseAuth.instance.signOut();
+                  if (cats.uid == null) {
+                    widget.switchMode();
+                  }
                 },
               ),
             ],
@@ -156,7 +160,10 @@ class _DistanceDrawerState extends State<DistanceDrawer> {
                                       ? FittedBox(
                                           child: CircularProgressIndicator(),
                                         ) //Icon(Icons.cloud_upload)
-                                      : Icon(Icons.check_circle_outline),
+                                      : Icon(
+                                          Icons.check_circle_outline,
+                                          color: Theme.of(context).primaryColor,
+                                        ),
                                   onPressed: _name.text == ''
                                       ? null
                                       : () async {

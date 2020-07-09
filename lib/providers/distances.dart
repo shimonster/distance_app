@@ -159,6 +159,7 @@ class Distances extends ChangeNotifier {
                     'time': DateTime.parse(mar['time'])
                   })
               .toList();
+          marks.sort((a, b) => a['time'].isAfter(b['time']) ? 1 : -1);
           loadedDistances.add(
             Distance(
               id: dist.documentID,
@@ -171,19 +172,22 @@ class Distances extends ChangeNotifier {
             ),
           );
         });
-        loadedDistances.sort((a, b) => a.time.isAfter(a.time) ? 1 : -1);
+        loadedDistances.sort((a, b) => a.time.isAfter(b.time) ? 1 : -1);
         print(loadedDistances);
         _distances = loadedDistances;
+        notifyListeners();
       } else {
         final loadedDistances = await SQLHelper.getDistances(uid ?? '');
-        loadedDistances.sort((a, b) => a.time.isAfter(a.time) ? 1 : -1);
+        loadedDistances.sort((a, b) => a.time.isAfter(b.time) ? 1 : -1);
         _distances = loadedDistances;
+        notifyListeners();
       }
     } on PlatformException catch (error) {
       final loadedDistances =
           await SQLHelper.getDistances(uid ?? DateTime.now());
-      loadedDistances.sort((a, b) => a.time.isAfter(a.time) ? 1 : -1);
+      loadedDistances.sort((a, b) => a.time.isAfter(b.time) ? 1 : -1);
       _distances = loadedDistances;
+      notifyListeners();
     } catch (error) {
       throw error;
     }

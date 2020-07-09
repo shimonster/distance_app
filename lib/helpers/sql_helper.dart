@@ -27,26 +27,29 @@ class SQLHelper {
       onCreate: (db, _) {
         return db.execute(
           'CREATE TABLE ${uid}Categories'
-          '(title TEXT PRIMARY KEY)',
+          '(id INTEGER PRIMARY KEY title TEXT)',
         );
       },
     );
   }
 
-  static Future<void> addCategory(String name, String uid) async {
+  static Future<void> addCategory(String name, String uid, int idx) async {
     final Database db = await categoryDbSetup(uid);
-    await db.insert(
-      '${uid}Categories',
-      {'title': name},
-      conflictAlgorithm: ConflictAlgorithm.abort,
-    );
+    final cats = await getCategories(uid);
+    if (!cats.contains(name)) {
+      await db.insert(
+        '${uid}Categories',
+        {'title': name, 'id': idx},
+        conflictAlgorithm: ConflictAlgorithm.abort,
+      );
+    }
   }
 
   static Future<List> getCategories(String uid) async {
     print('geting cats');
     final db = await categoryDbSetup(uid);
     final cats =
-        await db.query('${uid}Categories', columns: ['title'], distinct: true);
+        await db.query('${uid}Categories', distinct: true, orderBy: 'id');
     List listCats = [];
     cats.forEach((element) => listCats.add(element['title']));
     print('recieved cats: $cats');
@@ -91,6 +94,7 @@ class SQLHelper {
             LatLng(prevPoint['lat'] / 100000000, prevPoint['lng'] / 100000000),
             LatLng(element['lat'] / 100000000, element['lng'] / 100000000),
           ]);
+          print('past flat dist');
           distance +=
               sqrt(pow(flatDis, 2) + pow(element['alt'] - prevPoint['alt'], 2));
         }

@@ -8,6 +8,9 @@ import '../../widgets/distances/add_distance_widget.dart';
 import '../../widgets/distances/distance_display_widget.dart';
 
 class DistancesScreen extends StatefulWidget {
+  DistancesScreen(this.switchMode);
+
+  final void Function() switchMode;
   @override
   _DistancesScreenState createState() => _DistancesScreenState();
 }
@@ -33,25 +36,44 @@ class _DistancesScreenState extends State<DistancesScreen> {
   @override
   Widget build(BuildContext context) {
     final distances = Provider.of<Distances>(context);
+    final List<Distance> distanceCats = distances.distances
+        .where((element) => element.cat == category)
+        .toList();
 
     return Scaffold(
-      drawer: DistanceDrawer(_selectCategory),
+      drawer: DistanceDrawer(_selectCategory, widget.switchMode),
       appBar: AppBar(
         title: Text(category),
       ),
       body: Padding(
         padding: EdgeInsets.all(10),
         child: GridView.builder(
-          itemCount: distances.distances.length + 1,
+          itemCount: category == 'All'
+              ? distances.distances.length + 1
+              : distanceCats.length + 1,
           gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
             mainAxisSpacing: 10,
             crossAxisSpacing: 10,
             childAspectRatio: 6 / 5,
             maxCrossAxisExtent: 300,
           ),
-          itemBuilder: (ctx, i) => i != distances.distances.length
-              ? DistanceDisplayWidget(distances.distances[i])
-              : AddDistanceWidget(),
+          itemBuilder: (ctx, i) {
+            if (i !=
+                (category == 'All'
+                    ? distances.distances.length
+                    : distanceCats.length)) {
+              return DistanceDisplayWidget(
+                  category == 'All'
+                      ? distances.distances[i].id
+                      : distances.distances
+                          .where((element) => element.cat == category)
+                          .toList()[i]
+                          .id,
+                  ValueKey(distances.distances[i].id));
+            } else {
+              return AddDistanceWidget();
+            }
+          },
         ),
       ),
     );

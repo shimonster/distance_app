@@ -102,9 +102,9 @@ class _TrackDistanceBottomSheetState extends State<TrackDistanceBottomSheet> {
                           category,
                           widget._points,
                           dist);
-                      Navigator.of(context).pop();
-                      if (Navigator.of(context).canPop()) {
-                        Navigator.of(context).pop();
+                      Navigator.of(ctx).pop();
+                      if (Navigator.of(ctx).canPop()) {
+                        Navigator.of(ctx).pop();
                       }
                       name.clear();
                     },
@@ -148,7 +148,7 @@ class _TrackDistanceBottomSheetState extends State<TrackDistanceBottomSheet> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   Text(
-                    'Current Distance: $dist}',
+                    'Current Distance: ${dist.toStringAsFixed(3)}',
                     style: TextStyle(
                       color: Theme.of(context).accentColor,
                       fontSize: 17,
