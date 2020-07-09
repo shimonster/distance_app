@@ -27,7 +27,7 @@ class SQLHelper {
       onCreate: (db, _) {
         return db.execute(
           'CREATE TABLE ${uid}Categories'
-          '(id INTEGER PRIMARY KEY title TEXT)',
+          '(id INTEGER PRIMARY KEY, title TEXT)',
         );
       },
     );
@@ -61,7 +61,7 @@ class SQLHelper {
     final Database db = await distanceDbSetup(uid);
     points.forEach((point) {
       db.insert('${uid}Distances', {
-        'id': id + point['time'].toString(),
+        'id': id ?? DateTime.now().toString(),
         'name': name,
         'cat': category,
         'time': point['time'].toString(),

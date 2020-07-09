@@ -40,6 +40,37 @@ class Distances extends ChangeNotifier {
     return [..._distances];
   }
 
+  Future<void> sync() async {
+    try {
+      final dists = await SQLHelper.getDistances(uid);
+      _distances = dists;
+      _distances.forEach((d) {
+        print(d.id);
+        Firestore.instance
+            .collection('users/$uid/distances')
+            .document(d.id)
+            .updateData({
+          'name': d.name,
+          'time': d.time.toString(),
+          'distance': d.distance,
+          'units': d.units,
+          'category': d.cat,
+          'markers': d.markers
+              .map((e) => {
+                    'lat': e['LatLng'].latitude,
+                    'lng': e['LatLng'].longitude,
+                    'alt': e['alt'],
+                    'time': e['time'].toString(),
+                  })
+              .toList(),
+        });
+      });
+    } catch (error) {
+      throw error;
+    }
+    notifyListeners();
+  }
+
   double computeTotalDist(List<Map<String, dynamic>> markers) {
     var distance = 0.0;
     Map<String, dynamic> prevPoint;
@@ -121,6 +152,7 @@ class Distances extends ChangeNotifier {
             markers: markers,
           ),
         );
+        notifyListeners();
       } else {
         SQLHelper.addDistance(
             time.toIso8601String(), name, units, category, markers, '');
@@ -147,6 +179,7 @@ class Distances extends ChangeNotifier {
   Future<void> getDistances() async {
     try {
       if (uid != null) {
+        await sync();
         final result = await Firestore.instance
             .collection('users/$uid/distances')
             .getDocuments();
@@ -165,7 +198,7 @@ class Distances extends ChangeNotifier {
               id: dist.documentID,
               name: dist.data['name'],
               time: DateTime.parse(dist.data['time']),
-              distance: dist.data['distance'],
+              distance: double.parse(dist.data['distance'].toString()),
               units: dist.data['units'],
               cat: dist.data['category'],
               markers: marks,

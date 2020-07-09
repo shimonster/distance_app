@@ -14,6 +14,18 @@ class Categories extends ChangeNotifier {
     return [..._categories];
   }
 
+  Future<void> sync() async {
+    try {
+      final cats = await SQLHelper.getCategories(uid);
+      Firestore.instance.document('users/$uid').setData({
+        'categories': cats,
+      });
+    } catch (error) {
+      throw error;
+    }
+    notifyListeners();
+  }
+
   Future<void> putInitialCategories([String userId]) async {
     print('putting in intitial cats');
     try {
@@ -22,10 +34,12 @@ class Categories extends ChangeNotifier {
             .document('users/$userId')
             .setData({'categories': _categories});
       }
-      _categories.forEach((element) async {
-        await SQLHelper.addCategory(
-            element, userId ?? '', _categories.indexOf(element));
-      });
+      if (!(await SQLHelper.getCategories(uid)).contains('All')) {
+        _categories.forEach((element) async {
+          await SQLHelper.addCategory(
+              element, userId ?? '', _categories.indexOf(element));
+        });
+      }
       notifyListeners();
     } catch (error) {
       throw error;
@@ -50,6 +64,7 @@ class Categories extends ChangeNotifier {
   Future<void> getCategories() async {
     try {
       if (uid != null) {
+        await sync();
         print('firebase');
         final cats = await Firestore.instance.document('users/$uid').get();
         _categories = cats.data == null ? _categories : cats.data['categories'];

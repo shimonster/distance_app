@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -23,7 +24,6 @@ class _DistancesScreenState extends State<DistancesScreen> {
   void initState() {
     super.initState();
     cats = Provider.of<Categories>(context, listen: false).categories;
-    Provider.of<Distances>(context, listen: false).getDistances();
   }
 
   void _selectCategory(String cat) {
@@ -35,7 +35,7 @@ class _DistancesScreenState extends State<DistancesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final distances = Provider.of<Distances>(context);
+    final distances = Provider.of<Distances>(context, listen: false);
     final List<Distance> distanceCats = distances.distances
         .where((element) => element.cat == category)
         .toList();
@@ -45,36 +45,44 @@ class _DistancesScreenState extends State<DistancesScreen> {
       appBar: AppBar(
         title: Text(category),
       ),
-      body: Padding(
-        padding: EdgeInsets.all(10),
-        child: GridView.builder(
-          itemCount: category == 'All'
-              ? distances.distances.length + 1
-              : distanceCats.length + 1,
-          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-            mainAxisSpacing: 10,
-            crossAxisSpacing: 10,
-            childAspectRatio: 6 / 5,
-            maxCrossAxisExtent: 300,
-          ),
-          itemBuilder: (ctx, i) {
-            if (i !=
-                (category == 'All'
-                    ? distances.distances.length
-                    : distanceCats.length)) {
-              return DistanceDisplayWidget(
-                  category == 'All'
-                      ? distances.distances[i].id
-                      : distances.distances
-                          .where((element) => element.cat == category)
-                          .toList()[i]
-                          .id,
-                  ValueKey(distances.distances[i].id));
-            } else {
-              return AddDistanceWidget();
-            }
-          },
-        ),
+      body: FutureBuilder(
+        future: distances.getDistances(),
+        builder: (ctx, snapshot) => snapshot.connectionState ==
+                ConnectionState.waiting
+            ? Center(
+                child: CircularProgressIndicator(),
+              )
+            : Padding(
+                padding: EdgeInsets.all(10),
+                child: GridView.builder(
+                  itemCount: category == 'All'
+                      ? distances.distances.length + 1
+                      : distanceCats.length + 1,
+                  gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                    mainAxisSpacing: 10,
+                    crossAxisSpacing: 10,
+                    childAspectRatio: 6 / 5,
+                    maxCrossAxisExtent: 300,
+                  ),
+                  itemBuilder: (ctx, i) {
+                    if (i !=
+                        (category == 'All'
+                            ? distances.distances.length
+                            : distanceCats.length)) {
+                      return DistanceDisplayWidget(
+                          category == 'All'
+                              ? distances.distances[i].id
+                              : distances.distances
+                                  .where((element) => element.cat == category)
+                                  .toList()[i]
+                                  .id,
+                          ValueKey(distances.distances[i].id));
+                    } else {
+                      return AddDistanceWidget();
+                    }
+                  },
+                ),
+              ),
       ),
     );
   }

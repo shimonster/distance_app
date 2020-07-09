@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/categories.dart';
+import '../../providers/distances.dart';
 
 class AuthCard extends StatefulWidget {
   AuthCard(this.switchMode);
@@ -32,13 +33,13 @@ class _AuthCardState extends State<AuthCard> {
         });
         _form.currentState.save();
         if (_isLogin) {
-          await auth.signInWithEmailAndPassword(
+          final result = await auth.signInWithEmailAndPassword(
               email: email, password: password);
         } else {
-          final result = await auth.createUserWithEmailAndPassword(
-              email: email, password: password);
-          await Provider.of<Categories>(context, listen: false)
-              .putInitialCategories(result.user.uid);
+          final result = await auth
+              .createUserWithEmailAndPassword(email: email, password: password)
+              .then((value) => Provider.of<Categories>(context, listen: false)
+                  .putInitialCategories(value.user.uid));
         }
         await Provider.of<Categories>(context, listen: false).getCategories();
       } on PlatformException catch (error) {
@@ -52,6 +53,7 @@ class _AuthCardState extends State<AuthCard> {
           _isLoading = false;
         });
       } catch (error) {
+        print(error);
         Scaffold.of(context).hideCurrentSnackBar();
         Scaffold.of(context).showSnackBar(
           SnackBar(

@@ -30,10 +30,10 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
   bool _hasDisposed = false;
   final MapController _mapController = MapController();
   final Distance distance = Distance();
-  static const _isolateName = 'LocationIsolate';
   ReceivePort port = ReceivePort();
   Stream _locationStream;
 
+  static const _isolateName = 'LocationIsolate';
   static const _distanceFilter = 10.0;
   static const _interval = 10;
   static const _initialZoom = 18.0;
@@ -63,19 +63,6 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
   @override
   void initState() {
     super.initState();
-    _mapController.onReady.then((value) =>
-        _isAtLastPoint = _mapController.center == _points.last['LatLng']);
-    _locationStream = Location().onLocationChanged
-      ..listen(
-        (LocationData event) => _hasDisposed
-            ? null
-            : _addPoint(
-                {
-                  'LatLng': LatLng(event.latitude, event.longitude),
-                  'alt': event.altitude //event.altitude
-                },
-              ),
-      );
     Location().getLocation().then(
           (value) => _addPoint(
             {
@@ -89,6 +76,19 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
         interval: _interval * 1000,
         distanceFilter: _distanceFilter,
         accuracy: LocationAccuracy.high);
+    _mapController.onReady.then((value) =>
+        _isAtLastPoint = _mapController.center == _points.last['LatLng']);
+    _locationStream = Location().onLocationChanged
+      ..listen(
+        (LocationData event) => _hasDisposed
+            ? null
+            : _addPoint(
+                {
+                  'LatLng': LatLng(event.latitude, event.longitude),
+                  'alt': event.altitude //event.altitude
+                },
+              ),
+      );
     IsolateNameServer.registerPortWithName(port.sendPort, _isolateName);
     port.listen((dynamic data) {
       _addPoint(data);
