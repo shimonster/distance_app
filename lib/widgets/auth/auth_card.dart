@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../providers/categories.dart';
 import '../../providers/distances.dart';
@@ -22,6 +23,7 @@ class _AuthCardState extends State<AuthCard> {
   String email;
   String password;
   bool _isLoading = false;
+  bool _isGoogleLoading = false;
 
   Future<void> _authenticate() async {
     print('authenticating');
@@ -179,7 +181,7 @@ class _AuthCardState extends State<AuthCard> {
                               ),
                             );
                           },
-                  )
+                  ),
                 ],
               ),
             ),
