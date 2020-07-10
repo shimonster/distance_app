@@ -132,8 +132,8 @@ class _TrackDistanceBottomSheetState extends State<TrackDistanceBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    dist = Provider.of<Distances>(context, listen: false)
-        .computeTotalDist(widget._points);
+    final distances = Provider.of<Distances>(context, listen: false);
+    dist = distances.computeTotalDist(widget._points);
     print('bottomsheet build was run');
 
     return Container(
@@ -148,7 +148,7 @@ class _TrackDistanceBottomSheetState extends State<TrackDistanceBottomSheet> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   Text(
-                    'Current Distance: ${dist.toStringAsFixed(3)}',
+                    'Current Distance: ${dist.toStringAsFixed(3)} ${distances.preferredUnit}',
                     style: TextStyle(
                       color: Theme.of(context).accentColor,
                       fontSize: 17,

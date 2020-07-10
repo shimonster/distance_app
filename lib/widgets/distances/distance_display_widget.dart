@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:latlong/latlong.dart';
 
 import '../../providers/distances.dart' as d;
+import '../../screens/distances/distance_details_screen.dart';
 
 class DistanceDisplayWidget extends StatelessWidget {
   DistanceDisplayWidget(this.distId, key) : super(key: key);
@@ -60,7 +61,10 @@ class DistanceDisplayWidget extends StatelessWidget {
     _mapController.onReady.then((value) =>
         _mapController.move(zoomCenter['center'], _mapController.zoom));
     return InkWell(
-      onTap: () {},
+      onTap: () {
+        Navigator.of(context).push(
+            MaterialPageRoute(builder: (ctx) => DistanceDetailsScreen(dist)));
+      },
       child: Container(
         decoration: BoxDecoration(
           border: Border.all(width: 5, color: Theme.of(context).accentColor),
@@ -71,43 +75,46 @@ class DistanceDisplayWidget extends StatelessWidget {
           child: GridTile(
             child: Stack(
               children: <Widget>[
-                FlutterMap(
-                  mapController: _mapController,
-                  options: MapOptions(
-                    center: zoomCenter['center'],
-                    interactive: false,
-                    zoom: zoomCenter['zoom'],
+                Hero(
+                  tag: dist.id,
+                  child: FlutterMap(
+                    mapController: _mapController,
+                    options: MapOptions(
+                      center: zoomCenter['center'],
+                      interactive: false,
+                      zoom: zoomCenter['zoom'],
+                    ),
+                    layers: [
+                      TileLayerOptions(
+                        urlTemplate:
+                            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                        subdomains: ['a', 'b', 'c'],
+                      ),
+                      MarkerLayerOptions(
+                        markers: dist.markers.map<Marker>((e) {
+                          final int calcAlt =
+                              (sqrt(max(e['alt'] + 1300, 0)) * 1.84).round();
+                          return Marker(
+                            point: e['LatLng'],
+                            width: 9,
+                            builder: (ctx) => CircleAvatar(
+                              backgroundColor: e['alt'] <= 0
+                                  ? Color.fromRGBO(0, 255, 0, 1)
+                                  : e['alt'] > 30000
+                                      ? Colors.white
+                                      : Color.fromRGBO(
+                                          min((calcAlt).round(), 255),
+                                          max((255 - calcAlt).round(),
+                                              -510 + calcAlt * 2),
+                                          min((calcAlt * 2).round(),
+                                              380 - calcAlt),
+                                          1),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
                   ),
-                  layers: [
-                    TileLayerOptions(
-                      urlTemplate:
-                          "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                      subdomains: ['a', 'b', 'c'],
-                    ),
-                    MarkerLayerOptions(
-                      markers: dist.markers.map<Marker>((e) {
-                        final int calcAlt =
-                            (sqrt(max(e['alt'] + 1300, 0)) * 1.84).round();
-                        return Marker(
-                          point: e['LatLng'],
-                          width: 9,
-                          builder: (ctx) => CircleAvatar(
-                            backgroundColor: e['alt'] <= 0
-                                ? Color.fromRGBO(0, 255, 0, 1)
-                                : e['alt'] > 30000
-                                    ? Colors.white
-                                    : Color.fromRGBO(
-                                        min((calcAlt).round(), 255),
-                                        max((255 - calcAlt).round(),
-                                            -510 + calcAlt * 2),
-                                        min((calcAlt * 2).round(),
-                                            380 - calcAlt),
-                                        1),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ],
                 ),
                 Container(
                   padding: EdgeInsets.all(10),

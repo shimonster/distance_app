@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:latlong/latlong.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:maps_toolkit/maps_toolkit.dart' as mt;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../helpers/sql_helper.dart';
 
@@ -32,12 +33,26 @@ class Distances extends ChangeNotifier {
   Distances(this.uid, this.categories, [this._distances]);
 
   final String uid;
-  final String preferredUnit = 'Meters';
+  String preferredUnit = 'Kilometers';
   final List<String> categories;
   List<Distance> _distances = [];
 
   List<Distance> get distances {
     return [..._distances];
+  }
+
+  Future<void> setUnit(String unit) async {
+    preferredUnit = unit;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('preferredUnit$uid', unit);
+    notifyListeners();
+  }
+
+  Future<void> getUnits() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.containsKey('preferredUnit$uid')) {
+      preferredUnit = prefs.getString('preferredUnit$uid');
+    }
   }
 
   Future<void> sync() async {
@@ -77,10 +92,12 @@ class Distances extends ChangeNotifier {
     markers.forEach((element) {
       if (prevPoint != null) {
         final flatDis = mt.SphericalUtil.computeLength([
-          mt.LatLng(
-              prevPoint['LatLng'].latitude, prevPoint['LatLng'].longitude),
-          mt.LatLng(element['LatLng'].latitude, element['LatLng'].longitude),
-        ]);
+              mt.LatLng(
+                  prevPoint['LatLng'].latitude, prevPoint['LatLng'].longitude),
+              mt.LatLng(
+                  element['LatLng'].latitude, element['LatLng'].longitude),
+            ]) /
+            (preferredUnit == 'Miles' ? 1609.34 : 1000);
         final calcDis =
             sqrt(pow(flatDis, 2) + pow((element['alt'] - prevPoint['alt']), 2));
         distance += calcDis;
