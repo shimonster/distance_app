@@ -46,7 +46,7 @@ class _DistancesScreenState extends State<DistancesScreen> {
         title: Text(category),
       ),
       body: FutureBuilder(
-        future: distances.getDistances(),
+        future: distances.getDistances(context),
         builder: (ctx, snapshot) => snapshot.connectionState ==
                 ConnectionState.waiting
             ? Center(

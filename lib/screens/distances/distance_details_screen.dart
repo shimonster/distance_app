@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong/latlong.dart';
+import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
 import '../../providers/distances.dart' as d;
@@ -99,7 +100,10 @@ class DistanceDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Duration distTime =
+        dist.markers.last['time'].difference(dist.markers.first['time']);
     final pInfo = getPathInfo();
+    final distances = Provider.of<d.Distances>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         title: Text(dist.name),
@@ -174,11 +178,17 @@ class DistanceDetailsScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    _buildInfoText(true, 'Info'),
-                    _buildInfoText(
-                        false,
-                        /*'Time: ${*/ DateFormat('yMMMMd')
-                            .format(dist.time) /*}'*/),
+                    _buildInfoText(true, 'General Info'),
+                    _buildInfoText(false,
+                        'Date: ${DateFormat('yMMMMd').format(dist.time)}'),
+                    _buildInfoText(false,
+                        'Distance Time: ${NumberFormat('00').format(distTime.inHours)}:${NumberFormat('00').format(distTime.inMinutes.remainder(60))}:${NumberFormat('00').format(distTime.inSeconds.remainder(60))}'),
+                    _buildInfoText(false,
+                        'Start: ${DateFormat('jms').format(dist.markers.first['time'])}'),
+                    _buildInfoText(false,
+                        'End: ${DateFormat('jms').format(dist.markers.last['time'])}'),
+                    _buildInfoText(false,
+                        'Average Speed: ${(dist.distance / (distTime.inSeconds / 3600)).toStringAsFixed(2)}  ${distances.preferredUnit == 'Miles' ? 'mph' : 'kph'}'),
                     Divider(),
                     _buildInfoText(true, 'Path Info'),
                     _buildInfoText(false,

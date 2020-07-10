@@ -1,10 +1,13 @@
 import 'dart:math';
 
+import 'package:flutter/cupertino.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import '../providers/distances.dart';
 import 'package:latlong/latlong.dart' as ll;
 import 'package:maps_toolkit/maps_toolkit.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/distances.dart';
 
 class SQLHelper {
   static Future<Database> distanceDbSetup(String uid) async {
@@ -13,8 +16,8 @@ class SQLHelper {
       join(dbPath, '${uid}Distances.db'),
       version: 1,
       onCreate: (db, _) {
-        return db.execute('CREATE TABLE ${uid}Distances '
-            '(id TEXT PRIMARY KEY, name TEXT, cat TEXT, time TEXT, lat REAL, lng REAL, alt REAL)');
+        return db.execute('CREATE TABLE Distances '
+            '(idNum INTEGER PRIMARY KEY AUTOINCREMENT, id TEXT, name TEXT, cat TEXT, time TEXT, lat REAL, lng REAL, alt REAL)');
       },
     );
   }
@@ -26,7 +29,7 @@ class SQLHelper {
       version: 1,
       onCreate: (db, _) {
         return db.execute(
-          'CREATE TABLE ${uid}Categories'
+          'CREATE TABLE Categories'
           '(id INTEGER PRIMARY KEY, title TEXT)',
         );
       },
@@ -38,7 +41,7 @@ class SQLHelper {
     final cats = await getCategories(uid);
     if (!cats.contains(name)) {
       await db.insert(
-        '${uid}Categories',
+        'Categories',
         {'title': name, 'id': idx},
         conflictAlgorithm: ConflictAlgorithm.abort,
       );
@@ -48,8 +51,7 @@ class SQLHelper {
   static Future<List> getCategories(String uid) async {
     print('geting cats');
     final db = await categoryDbSetup(uid);
-    final cats =
-        await db.query('${uid}Categories', distinct: true, orderBy: 'id');
+    final cats = await db.query('Categories', distinct: true, orderBy: 'id');
     List listCats = [];
     cats.forEach((element) => listCats.add(element['title']));
     print('recieved cats: $cats');
@@ -60,24 +62,28 @@ class SQLHelper {
       String category, List<Map<String, dynamic>> points, String uid) async {
     final Database db = await distanceDbSetup(uid);
     points.forEach((point) {
-      db.insert('${uid}Distances', {
-        'id': id ?? DateTime.now().toString(),
-        'name': name,
-        'cat': category,
-        'time': point['time'].toString(),
-        'lat': point['lat'],
-        'lng': point['lng'],
-        'alt': point['alt'],
-      });
+      db.insert(
+        'Distances',
+        {
+          'id': id ?? DateTime.now().toString(),
+          'name': name,
+          'cat': category,
+          'time': point['time'].toString(),
+          'lat': point['lat'],
+          'lng': point['lng'],
+          'alt': point['alt'],
+        },
+        conflictAlgorithm: ConflictAlgorithm.ignore,
+      );
     });
   }
 
-  static Future<List<Distance>> getDistances(String uid) async {
+  static Future<List<Distance>> getDistances(
+      String uid, BuildContext context) async {
     final db = await distanceDbSetup(uid);
     Map<String, List<Map>> pointList = {};
     List<Distance> distances = [];
-    final points =
-        await db.query('${uid}Distances', groupBy: 'id', orderBy: 'time');
+    final points = await db.query('Distances', groupBy: 'id', orderBy: 'time');
     points.forEach((Map<dynamic, dynamic> point) {
       if (pointList.containsKey(point['id'])) {
         pointList[point['id']].add(point);
@@ -100,22 +106,24 @@ class SQLHelper {
         }
         prevPoint = element;
       });
-      distances.add(Distance(
-        id: key,
-        name: value[0]['name'],
-        time: DateTime.parse(value[0]['time']),
-        distance: distance,
-        markers: value
-            .map((e) => {
-                  'LatLng':
-                      ll.LatLng(e['lat'] / 100000000, e['lng'] / 100000000),
-                  'alt': e['alt'],
-                  'time': DateTime.parse(e['time'])
-                })
-            .toList(),
-        cat: value[0]['cat'],
-        units: 'meters',
-      ));
+      distances.add(
+        Distance(
+          id: key,
+          name: value[0]['name'],
+          time: DateTime.parse(value[0]['time']),
+          distance: distance,
+          markers: value
+              .map((e) => {
+                    'LatLng':
+                        ll.LatLng(e['lat'] / 100000000, e['lng'] / 100000000),
+                    'alt': e['alt'],
+                    'time': DateTime.parse(e['time'])
+                  })
+              .toList(),
+          cat: value[0]['cat'],
+          units: Provider.of<Distances>(context).preferredUnit,
+        ),
+      );
     });
     print(distances);
     return distances;

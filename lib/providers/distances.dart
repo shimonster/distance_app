@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:latlong/latlong.dart';
@@ -55,9 +56,9 @@ class Distances extends ChangeNotifier {
     }
   }
 
-  Future<void> sync() async {
+  Future<void> sync(BuildContext context) async {
     try {
-      final dists = await SQLHelper.getDistances(uid);
+      final dists = await SQLHelper.getDistances(uid, context);
       _distances = dists;
       _distances.forEach((d) {
         print(d.id);
@@ -145,14 +146,22 @@ class Distances extends ChangeNotifier {
       double distance) async {
     try {
       //final distance = computeTotalDist(markers);
-      final newMarks = markers
-          .map((e) => {
-                'lat': (e['LatLng'].latitude * 100000000).round(),
-                'lng': (e['LatLng'].longitude * 100000000).round(),
-                'alt': e['alt'],
-                'time': e['time'].toString(),
-              })
-          .toList();
+      Map<String, dynamic> prevE;
+      final newMarks = markers.expand<Map<String, dynamic>>((e) {
+        if (e != prevE) {
+          prevE = e;
+          return [
+            {
+              'lat': (e['LatLng'].latitude * 100000000).round(),
+              'lng': (e['LatLng'].longitude * 100000000).round(),
+              'alt': e['alt'],
+              'time': e['time'].toString(),
+            }
+          ];
+        }
+        prevE = e;
+        return [];
+      }).toList();
       if (uid != null) {
         final result =
             await addToDatabase(name, time, units, category, markers, distance);
@@ -193,10 +202,10 @@ class Distances extends ChangeNotifier {
     }
   }
 
-  Future<void> getDistances() async {
+  Future<void> getDistances(BuildContext context) async {
     try {
       if (uid != null) {
-        await sync();
+        await sync(context);
         final result = await Firestore.instance
             .collection('users/$uid/distances')
             .getDocuments();
@@ -227,14 +236,15 @@ class Distances extends ChangeNotifier {
         _distances = loadedDistances;
         notifyListeners();
       } else {
-        final loadedDistances = await SQLHelper.getDistances(uid ?? '');
+        final loadedDistances =
+            await SQLHelper.getDistances(uid ?? '', context);
         loadedDistances.sort((a, b) => a.time.isAfter(b.time) ? 1 : -1);
         _distances = loadedDistances;
         notifyListeners();
       }
     } on PlatformException catch (error) {
       final loadedDistances =
-          await SQLHelper.getDistances(uid ?? DateTime.now());
+          await SQLHelper.getDistances(uid ?? DateTime.now(), context);
       loadedDistances.sort((a, b) => a.time.isAfter(b.time) ? 1 : -1);
       _distances = loadedDistances;
       notifyListeners();

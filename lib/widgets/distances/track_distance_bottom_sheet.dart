@@ -134,7 +134,7 @@ class _TrackDistanceBottomSheetState extends State<TrackDistanceBottomSheet> {
   Widget build(BuildContext context) {
     final distances = Provider.of<Distances>(context, listen: false);
     dist = distances.computeTotalDist(widget._points);
-    print('bottomsheet build was run');
+    print('bottomsheet build was run: ${widget._points}');
 
     return Container(
       width: double.infinity,

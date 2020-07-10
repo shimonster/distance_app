@@ -38,12 +38,12 @@ class _DistanceDrawerState extends State<DistanceDrawer> {
 
   @override
   void initState() {
-    Provider.of<Distances>(context, listen: false)
-        .getUnits()
-        .then((value) => setState(() {
-              preferredUnits =
-                  Provider.of<Distances>(context, listen: false).preferredUnit;
-            }));
+    Provider.of<Distances>(context, listen: false).getUnits().then(
+          (value) => setState(() {
+            preferredUnits =
+                Provider.of<Distances>(context, listen: false).preferredUnit;
+          }),
+        );
 
     super.initState();
   }
