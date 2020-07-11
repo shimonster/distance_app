@@ -34,7 +34,8 @@ class Categories extends ChangeNotifier {
             .document('users/$userId')
             .setData({'categories': _categories});
       }
-      if (!(await SQLHelper.getCategories(uid)).contains('All')) {
+      print(['uid $uid', 'userId $userId']);
+      if (!(await SQLHelper.getCategories(userId)).contains('All')) {
         _categories.forEach((element) async {
           await SQLHelper.addCategory(
               element, userId ?? '', _categories.indexOf(element));

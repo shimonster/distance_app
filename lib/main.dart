@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import './providers/categories.dart';
 import './providers/distances.dart';
@@ -19,6 +22,14 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   var _account = true;
+  GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: <String>[
+      'email',
+      'https://www.googleapis.com/auth/contacts.readonly',
+    ],
+  );
+  GoogleSignInAccount _googleAccount;
+  StreamSubscription _listener;
 
   void _switchMode() {
     setState(() {
@@ -26,11 +37,20 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  void testDist() {}
+  @override
+  void dispose() {
+    super.dispose();
+    _listener.cancel();
+  }
 
   @override
   void initState() {
-    testDist();
+    _listener = _googleSignIn.onCurrentUserChanged.listen((account) {
+      print('authstate changed');
+      setState(() {
+        _googleAccount = account;
+      });
+    });
     super.initState();
   }
 
@@ -39,17 +59,23 @@ class _MyAppState extends State<MyApp> {
     return StreamBuilder(
       stream: FirebaseAuth.instance.onAuthStateChanged,
       builder: (ctx, snapshot) {
-        print(snapshot.data);
+        print('builder was run');
+        print('auth snapshot: ${snapshot.data}');
+        print('google snapshot: ${_googleAccount}');
         return MultiProvider(
           providers: [
             ChangeNotifierProvider.value(
               value: Categories(
-                snapshot.data != null ? snapshot.data.uid : null,
+                snapshot.data != null
+                    ? snapshot.data.uid
+                    : _googleAccount != null ? _googleAccount.id : null,
               ),
             ),
             ChangeNotifierProxyProvider<Categories, Distances>(
               update: (ctx, cat, prev) => Distances(
-                snapshot.data != null ? snapshot.data.uid : null,
+                snapshot.data != null
+                    ? snapshot.data.uid
+                    : _googleAccount != null ? _googleAccount.id : null,
                 cat.categories,
                 prev == null ? [] : prev.distances,
               ),
@@ -74,9 +100,9 @@ class _MyAppState extends State<MyApp> {
                       child: CircularProgressIndicator(),
                     ),
                   )
-                : snapshot.data == null && _account
-                    ? AuthScreen(_switchMode)
-                    : DistancesScreen(_switchMode),
+                : snapshot.data != null || _googleAccount != null || !_account
+                    ? DistancesScreen(_switchMode)
+                    : AuthScreen(_switchMode),
             routes: {
               AddDistanceTrackScreen.routeName: (ctx) =>
                   AddDistanceTrackScreen(),

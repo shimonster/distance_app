@@ -29,7 +29,7 @@ class SQLHelper {
       version: 1,
       onCreate: (db, _) {
         return db.execute(
-          'CREATE TABLE Categories'
+          'CREATE TABLE Categs'
           '(id INTEGER PRIMARY KEY, title TEXT)',
         );
       },
@@ -41,7 +41,7 @@ class SQLHelper {
     final cats = await getCategories(uid);
     if (!cats.contains(name)) {
       await db.insert(
-        'Categories',
+        'Categs',
         {'title': name, 'id': idx},
         conflictAlgorithm: ConflictAlgorithm.abort,
       );
@@ -51,7 +51,7 @@ class SQLHelper {
   static Future<List> getCategories(String uid) async {
     print('geting cats');
     final db = await categoryDbSetup(uid);
-    final cats = await db.query('Categories', distinct: true, orderBy: 'id');
+    final cats = await db.query('Categs', distinct: true, orderBy: 'id');
     List listCats = [];
     cats.forEach((element) => listCats.add(element['title']));
     print('recieved cats: $cats');

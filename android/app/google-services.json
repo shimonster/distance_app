@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "1056172180019-7b4o8q54b8rmema28a47pqnkje848icn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.shimonster.distanceapp",
+            "certificate_hash": "723a7967b9dc4d6ffd866b9c5790309b9f2952a0"
+          }
+        },
+        {
           "client_id": "1056172180019-cmcc57373qapcjd4kg8idt0rbel0ihda.apps.googleusercontent.com",
           "client_type": 3
         }
