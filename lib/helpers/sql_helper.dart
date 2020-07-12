@@ -17,19 +17,21 @@ class SQLHelper {
       version: 1,
       onCreate: (db, _) {
         return db.execute('CREATE TABLE Distances '
-            '(idNum INTEGER PRIMARY KEY AUTOINCREMENT, id TEXT, name TEXT, cat TEXT, time TEXT, lat REAL, lng REAL, alt REAL)');
+            '(idNum INTEGER PRIMARY KEY AUTOINCREMENT, id TEXT, name TEXT, cat TEXT, time TEXT, lat INTEGER, lng INTEGER, alt REAL)');
       },
     );
   }
 
   static Future<Database> categoryDbSetup(String uid) async {
+    print('db setup');
     final dbPath = await getDatabasesPath();
     return openDatabase(
-      join(dbPath + '${uid}Categories.db'),
+      join(dbPath + '${uid}Cats.db'),
       version: 1,
       onCreate: (db, _) {
+        print('executing');
         return db.execute(
-          'CREATE TABLE Categs'
+          'CREATE TABLE Categories'
           '(id INTEGER PRIMARY KEY, title TEXT)',
         );
       },
@@ -41,7 +43,7 @@ class SQLHelper {
     final cats = await getCategories(uid);
     if (!cats.contains(name)) {
       await db.insert(
-        'Categs',
+        'Categories',
         {'title': name, 'id': idx},
         conflictAlgorithm: ConflictAlgorithm.abort,
       );
@@ -51,7 +53,7 @@ class SQLHelper {
   static Future<List> getCategories(String uid) async {
     print('geting cats');
     final db = await categoryDbSetup(uid);
-    final cats = await db.query('Categs', distinct: true, orderBy: 'id');
+    final cats = await db.query('Categories', distinct: true, orderBy: 'id');
     List listCats = [];
     cats.forEach((element) => listCats.add(element['title']));
     print('recieved cats: $cats');
@@ -80,52 +82,66 @@ class SQLHelper {
 
   static Future<List<Distance>> getDistances(
       String uid, BuildContext context) async {
-    final db = await distanceDbSetup(uid);
-    Map<String, List<Map>> pointList = {};
-    List<Distance> distances = [];
-    final points = await db.query('Distances', groupBy: 'id', orderBy: 'time');
-    points.forEach((Map<dynamic, dynamic> point) {
-      if (pointList.containsKey(point['id'])) {
-        pointList[point['id']].add(point);
-      } else {
-        pointList.putIfAbsent(point['id'], () => [point]);
-      }
-    });
-    pointList.forEach((key, value) {
-      var distance = 0.0;
-      Map<String, dynamic> prevPoint;
-      value.forEach((element) {
-        if (prevPoint != null) {
-          final flatDis = SphericalUtil.computeLength([
-            LatLng(prevPoint['lat'] / 100000000, prevPoint['lng'] / 100000000),
-            LatLng(element['lat'] / 100000000, element['lng'] / 100000000),
-          ]);
-          print('past flat dist');
-          distance +=
-              sqrt(pow(flatDis, 2) + pow(element['alt'] - prevPoint['alt'], 2));
-        }
-        prevPoint = element;
-      });
-      distances.add(
-        Distance(
-          id: key,
-          name: value[0]['name'],
-          time: DateTime.parse(value[0]['time']),
-          distance: distance,
-          markers: value
-              .map((e) => {
-                    'LatLng':
-                        ll.LatLng(e['lat'] / 100000000, e['lng'] / 100000000),
-                    'alt': e['alt'],
-                    'time': DateTime.parse(e['time'])
-                  })
-              .toList(),
-          cat: value[0]['cat'],
-          units: Provider.of<Distances>(context).preferredUnit,
-        ),
+    try {
+      final db = await distanceDbSetup(uid);
+      Map<String, List<Map>> pointList = {};
+      List<Distance> distances = [];
+      final points = await db.query(
+        'Distances',
+        orderBy: 'idNum',
       );
-    });
-    print(distances);
-    return distances;
+      print(points);
+      points.forEach((Map<dynamic, dynamic> point) {
+        if (pointList.containsKey(point['id'])) {
+          pointList[point['id']].add(point);
+        } else {
+          pointList.putIfAbsent(point['id'], () => [point]);
+        }
+      });
+      print(pointList);
+      pointList.forEach((key, value) {
+        var distance = 0.0;
+        Map<String, dynamic> prevPoint;
+        value.forEach((element) {
+          if (prevPoint != null) {
+            final flatDis = SphericalUtil.computeLength([
+              LatLng(
+                  prevPoint['lat'] / 100000000, prevPoint['lng'] / 100000000),
+              LatLng(element['lat'] / 100000000, element['lng'] / 100000000),
+            ]);
+            print('past flat dist');
+            distance += sqrt(
+                pow(flatDis, 2) + pow(element['alt'] - prevPoint['alt'], 2));
+          }
+          prevPoint = element;
+        });
+        print('after computing dist');
+        print([key, value]);
+        distances.add(
+          Distance(
+            id: key,
+            name: value[0]['name'],
+            time: DateTime.parse(value[0]['time']),
+            distance: distance,
+            markers: value
+                .map((e) => {
+                      'LatLng':
+                          ll.LatLng(e['lat'] / 100000000, e['lng'] / 100000000),
+                      'alt': e['alt'],
+                      'time': DateTime.parse(e['time'])
+                    })
+                .toList(),
+            cat: value[0]['cat'],
+            units: Provider.of<Distances>(context, listen: false).preferredUnit,
+          ),
+        );
+        print('added to distances');
+      });
+      print('$distances');
+      return distances;
+    } catch (error) {
+      print(error);
+      throw error;
+    }
   }
 }
