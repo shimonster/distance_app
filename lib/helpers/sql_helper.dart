@@ -71,9 +71,9 @@ class SQLHelper {
           'name': name,
           'cat': category,
           'time': point['time'].toString(),
-          'lat': point['lat'],
-          'lng': point['lng'],
-          'alt': point['alt'],
+          'lat': point['lat'].round(),
+          'lng': point['lng'].round(),
+          'alt': (point['alt'] * 100).round(),
         },
         conflictAlgorithm: ConflictAlgorithm.ignore,
       );
@@ -90,7 +90,6 @@ class SQLHelper {
         'Distances',
         orderBy: 'idNum',
       );
-      print(points);
       points.forEach((Map<dynamic, dynamic> point) {
         if (pointList.containsKey(point['id'])) {
           pointList[point['id']].add(point);
@@ -98,7 +97,6 @@ class SQLHelper {
           pointList.putIfAbsent(point['id'], () => [point]);
         }
       });
-      print(pointList);
       pointList.forEach((key, value) {
         var distance = 0.0;
         Map<String, dynamic> prevPoint;
@@ -109,14 +107,13 @@ class SQLHelper {
                   prevPoint['lat'] / 100000000, prevPoint['lng'] / 100000000),
               LatLng(element['lat'] / 100000000, element['lng'] / 100000000),
             ]);
-            print('past flat dist');
             distance += sqrt(
                 pow(flatDis, 2) + pow(element['alt'] - prevPoint['alt'], 2));
           }
           prevPoint = element;
         });
-        print('after computing dist');
-        print([key, value]);
+//        print('after computing dist');
+//        print([key, value]);
         distances.add(
           Distance(
             id: key,
@@ -127,7 +124,7 @@ class SQLHelper {
                 .map((e) => {
                       'LatLng':
                           ll.LatLng(e['lat'] / 100000000, e['lng'] / 100000000),
-                      'alt': e['alt'],
+                      'alt': e['alt'] / 100,
                       'time': DateTime.parse(e['time'])
                     })
                 .toList(),

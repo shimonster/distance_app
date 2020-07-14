@@ -35,6 +35,7 @@ class _TrackDistanceBottomSheetState extends State<TrackDistanceBottomSheet> {
   Widget _buildModalContent() {
     return StatefulBuilder(
       builder: (ctx, setModalState) {
+        bool isLoading = false;
         return Container(
           padding: EdgeInsets.all(10),
           child: SingleChildScrollView(
@@ -90,25 +91,39 @@ class _TrackDistanceBottomSheetState extends State<TrackDistanceBottomSheet> {
                           .toList(),
                     ),
                   ),
-                  RaisedButton(
-                    child: Text('Finish'),
-                    onPressed: () async {
-                      final distances =
-                          Provider.of<Distances>(ctx, listen: false);
-                      await distances.addDistance(
-                          name.text,
-                          widget._points.first['time'],
-                          distances.preferredUnit,
-                          category,
-                          widget._points,
-                          dist);
-                      Navigator.of(ctx).pop();
-                      if (Navigator.of(ctx).canPop()) {
-                        Navigator.of(ctx).pop();
-                      }
-                      name.clear();
-                    },
-                  ),
+                  isLoading
+                      ? Center(
+                          child: CircularProgressIndicator(),
+                        )
+                      : RaisedButton(
+                          child: isLoading
+                              ? CircularProgressIndicator()
+                              : Text('Finish'),
+                          onPressed: () async {
+                            final distances =
+                                Provider.of<Distances>(ctx, listen: false);
+                            setModalState(() {
+                              isLoading = true;
+                            });
+                            print('start adding');
+                            await distances.addDistance(
+                                name.text,
+                                widget._points.first['time'],
+                                distances.preferredUnit,
+                                category,
+                                widget._points,
+                                dist);
+                            print('finished adding');
+                            setModalState(() {
+                              isLoading = false;
+                            });
+                            Navigator.of(ctx).pop();
+                            if (Navigator.of(ctx).canPop()) {
+                              Navigator.of(ctx).pop();
+                            }
+                            name.clear();
+                          },
+                        ),
                   if (MediaQuery.of(ctx).viewInsets.bottom > 0 &&
                       nameFocus.hasFocus)
                     Expanded(
