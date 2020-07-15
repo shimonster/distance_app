@@ -39,15 +39,16 @@ class _DistancesScreenState extends State<DistancesScreen> {
     final List<Distance> distanceCats = distances.distances
         .where((element) => element.cat == category)
         .toList();
+    Future().
 
     return Scaffold(
       drawer: DistanceDrawer(_selectCategory, widget.switchMode),
       appBar: AppBar(
         title: Text(category),
       ),
-      body: FutureBuilder(
-        future: distances.getDistances(context),
-        builder: (ctx, snapshot) => snapshot.connectionState ==
+      body: StreamBuilder(
+        stream: distances.getDistances(context),
+        builder: (ctx, snapshot) => snapshot.data. ==
                 ConnectionState.waiting
             ? Center(
                 child: CircularProgressIndicator(),
