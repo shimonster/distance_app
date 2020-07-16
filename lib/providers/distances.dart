@@ -63,81 +63,6 @@ class Distances extends ChangeNotifier {
     }
   }
 
-  Future<List<Distance>> sync(BuildContext context) async {
-    try {
-      final sQLdists = await SQLHelper.getDistances(uid, context);
-      final dists = [...sQLdists];
-      final dbResult = await Firestore.instance
-          .collection('users/$uid/distances')
-          .getDocuments();
-      final dbDists = dbConvertResult(dbResult);
-      print(dbDists.length);
-      List<Distance> addToSql = [];
-      List<Distance> addToFirebase = [];
-      dbDists.forEach((element) {
-        if (!dists.contains(element)) {
-          addToSql.add(element);
-        }
-      });
-      dists.forEach((element) {
-        if (!dbDists.contains(element)) {
-          addToFirebase.add(element);
-        }
-      });
-      await Future.forEach(addToSql, (Distance element) async {
-        await SQLHelper.addDistance(
-            element.id,
-            element.name,
-            element.units,
-            element.cat,
-            element.markers
-                .map((e) => {
-                      'lat': e['LatLng'].latitude * 100000000,
-                      'lng': e['LatLng'].longitude * 100000000,
-                      'alt': e['alt'],
-                      'time': e['time']
-                    })
-                .toList(),
-            uid);
-      });
-      print('before');
-      var batch = Firestore.instance.batch();
-      addToFirebase.forEach((Distance element) {
-        final DocumentReference ref =
-            Firestore.instance.collection('users/$uid/distances').document();
-        batch.setData(ref, {
-          'name': element.name,
-          'time': element.time.toString(),
-          'distance': element.distance,
-          'units': element.units,
-          'category': element.cat,
-          'markers': element.markers
-              .map((e) => {
-                    'lat': e['LatLng'].latitude,
-                    'lng': e['LatLng'].longitude,
-                    'alt': e['alt'],
-                    'time': e['time'].toString(),
-                  })
-              .toList()
-        });
-      });
-      await batch.commit();
-      print('after');
-      dbDists.sort((a, b) => a.time.isAfter(b.time) ? -1 : 1);
-      dists.sort((a, b) => a.time.isAfter(b.time) ? -1 : 1);
-//      print('got dists: $dbDists');
-//      print('add to firebase: $addToFirebase');
-//      print('add to sql: $addToSql');
-      print('right before check');
-//      assert(dbDists == dists);
-      print('end');
-      return dbDists;
-    } catch (error) {
-      print('sync: $error');
-      throw error;
-    }
-  }
-
   double computeTotalDist(List<Map<String, dynamic>> markers) {
     var distance = 0.0;
     Map<String, dynamic> prevPoint;
@@ -168,51 +93,32 @@ class Distances extends ChangeNotifier {
       double distance,
       bool isWifi) async {
     try {
-      if (isWifi) {
-        final DocumentSnapshot result = await Firestore.instance
-            .collection('users/$uid/distances')
-            .document()
-            .get();
-        print('after getting ref');
-        await result.reference.setData({
-          'name': name,
-          'time': time.toString(),
-          'distance': distance,
-          'units': units,
-          'category': category,
-          'markers': markers
-              .map((e) => {
-                    'lat': e['LatLng'].latitude,
-                    'lng': e['LatLng'].longitude,
-                    'alt': e['alt'],
-                    'time': e['time'].toString(),
-                  })
-              .toList(),
-        });
-        return result;
-      } else {
-        print('before adding');
-        Firestore.instance
-            .collection('users/$uid/distances')
-            .document()
-            .setData({
-          'name': name,
-          'time': time.toString(),
-          'distance': distance,
-          'units': units,
-          'category': category,
-          'markers': markers
-              .map((e) => {
-                    'lat': e['LatLng'].latitude,
-                    'lng': e['LatLng'].longitude,
-                    'alt': e['alt'],
-                    'time': e['time'].toString(),
-                  })
-              .toList(),
-        });
-      }
-      print('after adding');
-      return null;
+      final DocumentSnapshot result = isWifi
+          ? await Firestore.instance
+              .collection('users/$uid/distances')
+              .document()
+              .get()
+          : null;
+      print('after getting ref');
+      await Firestore.instance
+          .collection('users/$uid/distances')
+          .document()
+          .setData({
+        'name': name,
+        'time': time.toString(),
+        'distance': distance,
+        'units': units,
+        'category': category,
+        'markers': markers
+            .map((e) => {
+                  'lat': e['LatLng'].latitude,
+                  'lng': e['LatLng'].longitude,
+                  'alt': e['alt'],
+                  'time': e['time'].toString(),
+                })
+            .toList(),
+      });
+      return result;
     } catch (error) {
       print('there was an error in adding to database');
       throw error;
@@ -244,12 +150,9 @@ class Distances extends ChangeNotifier {
       return [];
     }).toList();
     try {
-      //final distance = computeTotalDist(markers);
       if (uid != null) {
         final result = await addToDatabase(
             name, time, units, category, markers, distance, true);
-//        SQLHelper.addDistance(
-//            result.documentID, name, units, category, newMarks, uid);
         _distances.add(
           Distance(
             id: result.documentID,
@@ -279,12 +182,7 @@ class Distances extends ChangeNotifier {
       notifyListeners();
     } on PlatformException catch (error) {
       print('add distance error: $error');
-      await addToDatabase(
-          name, time, units, category, markers, distance, false);
-      print('after cach');
-//      Firestore.instance.document('users/$uid/distances').setData({data})
-//      SQLHelper.addDistance(
-//          time.toIso8601String(), name, units, category, newMarks, '');
+      addToDatabase(name, time, units, category, markers, distance, false);
       _distances.add(
         Distance(
           id: time.toIso8601String(),
@@ -296,6 +194,7 @@ class Distances extends ChangeNotifier {
           markers: markers,
         ),
       );
+      notifyListeners();
       return;
     } catch (error) {
       throw error;
@@ -330,42 +229,48 @@ class Distances extends ChangeNotifier {
     return loadedDistances;
   }
 
-  Future<void> getDistances (BuildContext context) {}
+  Future<void> getDistances(BuildContext context) async {
+    try {
+      if (uid != null) {
+        print('server');
+        final result = await Firestore.instance
+            .collection('users/$uid/distances')
+            .getDocuments();
+        print('after fetch');
+        _distances = dbConvertResult(result);
+        print('after convert');
+        notifyListeners();
+      } else {
+        final loadedDistances =
+            await SQLHelper.getDistances(uid ?? '', context);
+        loadedDistances.sort((a, b) => a.time.isAfter(b.time) ? 1 : -1);
+        _distances = loadedDistances;
+        notifyListeners();
+      }
+    } on PlatformException catch (error) {
+      print('platform exception get: $error');
+      final docs = await Firestore.instance
+          .collection('users/$uid/distances')
+          .getDocuments(source: Source.cache);
+      final loadedDistances = dbConvertResult(docs);
+      _distances = loadedDistances;
+//      notifyListeners();
+    } catch (error) {
+      throw error;
+    }
+  }
 
   Stream<Future<void>> streamGetDistances(BuildContext context) {
-    return Stream.periodic(Duration(seconds: 2), (_) async {
-      if (_distances.isEmpty ||
-          (_distances.last.time.difference(DateTime.now()).inSeconds < 2 &&
-              _isExpectingNew))
-        try {
-          if (uid != null) {
-//        final dists = await sync(context);
-            final result = await Firestore.instance
-                .collection('users/$uid/distances')
-                .getDocuments(source: Source.server);
-            _distances = dbConvertResult(result);
-            notifyListeners();
-          } else {
-            final loadedDistances =
-                await SQLHelper.getDistances(uid ?? '', context);
-            loadedDistances.sort((a, b) => a.time.isAfter(b.time) ? 1 : -1);
-            _distances = loadedDistances;
-            notifyListeners();
-          }
-        } on PlatformException catch (error) {
-          print('platform exception get: $error');
-//      final loadedDistances =
-//          await SQLHelper.getDistances(uid ?? DateTime.now(), context);
-//      loadedDistances.sort((a, b) => a.time.isAfter(b.time) ? 1 : -1);
-          final docs = await Firestore.instance
-              .collection('users/$uid/distances')
-              .getDocuments(source: Source.cache);
-          final loadedDistances = dbConvertResult(docs);
-          _distances = loadedDistances;
-          notifyListeners();
-        } catch (error) {
-          throw error;
+    return Stream.periodic(
+      Duration(milliseconds: 2000),
+      (_) async {
+        if (_distances.isEmpty ||
+            (_distances.last.time.difference(DateTime.now()).inSeconds < 2 &&
+                _isExpectingNew)) {
+          print('about to get distances');
+          getDistances(context);
         }
-    });
+      },
+    );
   }
 }

@@ -7,6 +7,7 @@ import '../../providers/categories.dart';
 import '../../providers/distances.dart';
 import '../../widgets/distances/add_distance_widget.dart';
 import '../../widgets/distances/distance_display_widget.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class DistancesScreen extends StatefulWidget {
   DistancesScreen(this.switchMode);
@@ -18,12 +19,25 @@ class DistancesScreen extends StatefulWidget {
 
 class _DistancesScreenState extends State<DistancesScreen> {
   var category = 'All';
-  List<String> cats;
+  var _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    cats = Provider.of<Categories>(context, listen: false).categories;
+//    setState(() {
+//      _isLoading = true;
+//    });
+//    final cats = Provider.of<Categories>(context, listen: false);
+//    Distances(cats.uid, cats.categories, context).getDistances(context).then(
+//          (value) => setState(() {
+//            print('after get distances initstate');
+//            _isLoading = false;
+//          }),
+//        );
+  }
+
+  void rebuild() {
+    setState(() {});
   }
 
   void _selectCategory(String cat) {
@@ -39,17 +53,16 @@ class _DistancesScreenState extends State<DistancesScreen> {
     final List<Distance> distanceCats = distances.distances
         .where((element) => element.cat == category)
         .toList();
-    Future().
 
     return Scaffold(
       drawer: DistanceDrawer(_selectCategory, widget.switchMode),
       appBar: AppBar(
         title: Text(category),
       ),
-      body: StreamBuilder(
-        stream: distances.getDistances(context),
-        builder: (ctx, snapshot) => snapshot.data. ==
-                ConnectionState.waiting
+      body: FutureBuilder(
+        future: distances.getDistances(context),
+        builder: (ctx, snapshot) => snapshot.connectionState ==
+                ConnectionState.waiting /* &&  _isLoading*/
             ? Center(
                 child: CircularProgressIndicator(),
               )
@@ -79,7 +92,7 @@ class _DistancesScreenState extends State<DistancesScreen> {
                                   .id,
                           ValueKey(distances.distances[i].id));
                     } else {
-                      return AddDistanceWidget();
+                      return AddDistanceWidget(rebuild);
                     }
                   },
                 ),

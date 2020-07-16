@@ -72,6 +72,13 @@ class _MyAppState extends State<MyApp> {
               ),
             ),
             ChangeNotifierProxyProvider<Categories, Distances>(
+              create: (ctx) => Distances(
+                snapshot.data != null
+                    ? snapshot.data.uid
+                    : _googleAccount != null ? _googleAccount.id : null,
+                [],
+                [],
+              ),
               update: (ctx, cat, prev) => Distances(
                 snapshot.data != null
                     ? snapshot.data.uid

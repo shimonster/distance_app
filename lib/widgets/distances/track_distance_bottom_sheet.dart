@@ -117,11 +117,11 @@ class _TrackDistanceBottomSheetState extends State<TrackDistanceBottomSheet> {
                             setModalState(() {
                               isLoading = false;
                             });
+                            name.clear();
                             Navigator.of(ctx).pop();
                             if (Navigator.of(ctx).canPop()) {
                               Navigator.of(ctx).pop();
                             }
-                            name.clear();
                           },
                         ),
                   if (MediaQuery.of(ctx).viewInsets.bottom > 0 &&
