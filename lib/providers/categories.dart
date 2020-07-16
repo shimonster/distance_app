@@ -57,9 +57,7 @@ class Categories extends ChangeNotifier {
     print(wifi);
     try {
       if (uid != null) {
-        if (wifi == ConnectivityResult.mobile ||
-            wifi == ConnectivityResult.wifi ||
-            wifi == null) {
+        if (wifi != ConnectivityResult.none) {
           final cats = await Firestore.instance.document('users/$uid').get();
           _categories =
               cats.data == null ? _categories : cats.data['categories'];

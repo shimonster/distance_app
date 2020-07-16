@@ -53,6 +53,7 @@ class _DistancesScreenState extends State<DistancesScreen> {
     final List<Distance> distanceCats = distances.distances
         .where((element) => element.cat == category)
         .toList();
+    print('distances screen build was run');
 
     return Scaffold(
       drawer: DistanceDrawer(_selectCategory, widget.switchMode),

@@ -7,6 +7,7 @@ import 'package:latlong/latlong.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:maps_toolkit/maps_toolkit.dart' as mt;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:connectivity/connectivity.dart';
 
 import '../helpers/sql_helper.dart';
 
@@ -150,10 +151,17 @@ class Distances extends ChangeNotifier {
       prevE = e;
       return [];
     }).toList();
+    // converts points to format for database ^
+    final wifi = await Connectivity().checkConnectivity();
+    final isConnected = wifi != ConnectivityResult.none;
     try {
       if (uid != null) {
-        await addToDatabase(
-            name, time, units, category, markers, distance, true);
+        if (isConnected) {
+          await addToDatabase(
+              name, time, units, category, markers, distance, true);
+        } else {
+          addToDatabase(name, time, units, category, markers, distance, false);
+        }
       } else {
         SQLHelper.addDistance(
             time.toIso8601String(), name, units, category, newMarks, '');
@@ -161,6 +169,7 @@ class Distances extends ChangeNotifier {
       notifyListeners();
     } on PlatformException catch (error) {
       print('add distance error: $error');
+      addToDatabase(name, time, units, category, markers, distance, false);
       _isError = true;
       throw error;
     } catch (error) {
@@ -211,15 +220,17 @@ class Distances extends ChangeNotifier {
   }
 
   Future<void> getDistances(BuildContext context) async {
+    print('got distances');
+    final wifi = await Connectivity().checkConnectivity();
+    print('after conncetivity');
+    final isConnected = wifi != ConnectivityResult.none;
+    print('is connected: $isConnected');
     try {
       if (uid != null) {
-        print('server');
         final result = await Firestore.instance
             .collection('users/$uid/distances')
-            .getDocuments();
-        print('after fetch');
+            .getDocuments(source: isConnected ? Source.server : Source.cache);
         _distances = dbConvertResult(result);
-        print('after convert');
         notifyListeners();
       } else {
         final loadedDistances =
