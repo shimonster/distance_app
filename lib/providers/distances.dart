@@ -132,6 +132,7 @@ class Distances extends ChangeNotifier {
       String category,
       List<Map<String, dynamic>> markers,
       double distance) async {
+    bool _isError = false;
     _isExpectingNew = true;
     Map<String, dynamic> prevE;
     final newMarks = markers.expand<Map<String, dynamic>>((e) {
@@ -151,22 +152,23 @@ class Distances extends ChangeNotifier {
     }).toList();
     try {
       if (uid != null) {
-        final result = await addToDatabase(
+        await addToDatabase(
             name, time, units, category, markers, distance, true);
-        _distances.add(
-          Distance(
-            id: result.documentID,
-            name: name,
-            time: time,
-            distance: distance,
-            units: units,
-            cat: category,
-            markers: markers,
-          ),
-        );
       } else {
         SQLHelper.addDistance(
             time.toIso8601String(), name, units, category, newMarks, '');
+      }
+      notifyListeners();
+    } on PlatformException catch (error) {
+      print('add distance error: $error');
+      _isError = true;
+      throw error;
+    } catch (error) {
+      _isError = true;
+      throw error;
+    } finally {
+      _isExpectingNew = false;
+      if (!_isError) {
         _distances.add(
           Distance(
             id: time.toIso8601String(),
@@ -179,27 +181,6 @@ class Distances extends ChangeNotifier {
           ),
         );
       }
-      notifyListeners();
-    } on PlatformException catch (error) {
-      print('add distance error: $error');
-      addToDatabase(name, time, units, category, markers, distance, false);
-      _distances.add(
-        Distance(
-          id: time.toIso8601String(),
-          name: name,
-          time: time,
-          distance: distance,
-          units: units,
-          cat: category,
-          markers: markers,
-        ),
-      );
-      notifyListeners();
-      return;
-    } catch (error) {
-      throw error;
-    } finally {
-      _isExpectingNew = false;
     }
   }
 

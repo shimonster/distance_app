@@ -36,6 +36,7 @@ dependencies:
   intl: ^0.16.1
   shared_preferences: ^0.5.8
   google_sign_in: ^4.5.1
+  connectivity: ^0.4.9
 
 
   # The following adds the Cupertino Icons font to your application.

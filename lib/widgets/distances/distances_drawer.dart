@@ -21,6 +21,7 @@ class _DistanceDrawerState extends State<DistanceDrawer> {
   var _isProcessingAdd = false;
   final _name = TextEditingController();
   String preferredUnits;
+  bool _isInit = false;
 
   Future<void> addCat() async {
     setState(() {
@@ -92,129 +93,125 @@ class _DistanceDrawerState extends State<DistanceDrawer> {
           ),
           Divider(),
           FutureBuilder(
-            future: cats.sync(),
-            builder: (context, sSnapshot) {
-              return FutureBuilder(
-                future: cats.getCategories(),
-                builder: (ctx, snapshot) => snapshot.connectionState ==
-                            ConnectionState.waiting ||
-                        sSnapshot.connectionState == ConnectionState.waiting
-                    ? Center(
-                        child: CircularProgressIndicator(),
-                      )
-                    : Expanded(
-                        child: ListView.builder(
-                          itemCount: cats.categories.length + 1,
-                          itemBuilder: (ctx, i) => i != cats.categories.length
-                              ? Container(
-                                  margin: EdgeInsets.only(
-                                      bottom: i == cats.categories.length - 1
-                                          ? 0
-                                          : 8,
-                                      left: 8,
-                                      right: 8),
-                                  child: InkWell(
+            future: !_isInit
+                ? Future(() async {
+                    await cats.getCategories();
+                    _isInit = true;
+                  })
+                : Future.delayed(Duration()),
+            builder: (ctx, snapshot) => snapshot.connectionState ==
+                    ConnectionState.waiting
+                ? Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : Expanded(
+                    child: ListView.builder(
+                      itemCount: cats.categories.length + 1,
+                      itemBuilder: (ctx, i) => i != cats.categories.length
+                          ? Container(
+                              margin: EdgeInsets.only(
+                                  bottom:
+                                      i == cats.categories.length - 1 ? 0 : 8,
+                                  left: 8,
+                                  right: 8),
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(10),
+                                splashColor:
+                                    Theme.of(context).primaryColorLight,
+                                onTap: () {
+                                  widget.selectCategory(cats.categories[i]);
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(width: 0.5),
                                     borderRadius: BorderRadius.circular(10),
-                                    splashColor:
-                                        Theme.of(context).primaryColorLight,
-                                    onTap: () {
-                                      widget.selectCategory(cats.categories[i]);
-                                    },
-                                    child: Container(
-                                      padding: EdgeInsets.all(10),
-                                      decoration: BoxDecoration(
-                                        border: Border.all(width: 0.5),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: Text(cats.categories[i]),
-                                    ),
                                   ),
+                                  child: Text(cats.categories[i]),
+                                ),
+                              ),
+                            )
+                          : !_isAdding
+                              ? FlatButton(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Icon(Icons.create_new_folder),
+                                      SizedBox(
+                                        width: 10,
+                                      ),
+                                      Text('Add Category')
+                                    ],
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _isAdding = true;
+                                    });
+                                  },
                                 )
-                              : !_isAdding
-                                  ? FlatButton(
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: <Widget>[
-                                          Icon(Icons.create_new_folder),
-                                          SizedBox(
-                                            width: 10,
-                                          ),
-                                          Text('Add Category')
-                                        ],
-                                      ),
-                                      onPressed: () {
-                                        setState(() {
-                                          _isAdding = true;
-                                        });
-                                      },
-                                    )
-                                  : Container(
-                                      height: 40,
-                                      margin: EdgeInsets.only(
-                                          top: 8, left: 8, right: 8),
-                                      padding:
-                                          EdgeInsets.symmetric(horizontal: 10),
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                          width: 0.5,
-                                          color: Theme.of(context).primaryColor,
-                                        ),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: <Widget>[
-                                          Expanded(
-                                            child: Container(
-                                              width: 200,
-                                              child: TextField(
-                                                controller: _name,
-                                                onChanged: (_) {
-                                                  setState(() {});
-                                                },
-                                                onSubmitted: _name.text == ''
-                                                    ? null
-                                                    : (_) async {
-                                                        await addCat();
-                                                        _name.clear();
-                                                      },
-                                                autofocus: true,
-                                                enableSuggestions: true,
-                                                textAlignVertical:
-                                                    TextAlignVertical.bottom,
-                                                decoration: InputDecoration(
-                                                  hintText: 'Name',
-                                                  border: InputBorder.none,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          IconButton(
-                                            icon: _isProcessingAdd
-                                                ? FittedBox(
-                                                    child:
-                                                        CircularProgressIndicator(),
-                                                  ) //Icon(Icons.cloud_upload)
-                                                : Icon(
-                                                    Icons.check_circle_outline,
-                                                    color: Theme.of(context)
-                                                        .primaryColor,
-                                                  ),
-                                            onPressed: _name.text == ''
+                              : Container(
+                                  height: 40,
+                                  margin: EdgeInsets.only(
+                                      top: 8, left: 8, right: 8),
+                                  padding: EdgeInsets.symmetric(horizontal: 10),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      width: 0.5,
+                                      color: Theme.of(context).primaryColor,
+                                    ),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      Expanded(
+                                        child: Container(
+                                          width: 200,
+                                          child: TextField(
+                                            controller: _name,
+                                            onChanged: (_) {
+                                              setState(() {});
+                                            },
+                                            onSubmitted: _name.text == ''
                                                 ? null
-                                                : () async {
+                                                : (_) async {
                                                     await addCat();
                                                     _name.clear();
                                                   },
+                                            autofocus: true,
+                                            enableSuggestions: true,
+                                            textAlignVertical:
+                                                TextAlignVertical.bottom,
+                                            decoration: InputDecoration(
+                                              hintText: 'Name',
+                                              border: InputBorder.none,
+                                            ),
                                           ),
-                                        ],
+                                        ),
                                       ),
-                                    ),
-                        ),
-                      ),
-              );
-            },
+                                      IconButton(
+                                        icon: _isProcessingAdd
+                                            ? FittedBox(
+                                                child:
+                                                    CircularProgressIndicator(),
+                                              ) //Icon(Icons.cloud_upload)
+                                            : Icon(
+                                                Icons.check_circle_outline,
+                                                color: Theme.of(context)
+                                                    .primaryColor,
+                                              ),
+                                        onPressed: _name.text == ''
+                                            ? null
+                                            : () async {
+                                                await addCat();
+                                                _name.clear();
+                                              },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                    ),
+                  ),
           ),
         ],
       ),
