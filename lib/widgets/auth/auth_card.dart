@@ -138,33 +138,43 @@ class _AuthCardState extends State<AuthCard> {
                     RaisedButton(
                       child: Text(_isLogin ? 'Login' : 'Signup'),
                       onPressed: _authenticate,
-                    ),
-                  if (_isLoading) CircularProgressIndicator(),
-                  SizedBox(
-                    height: 37,
-                    child: OutlineButton.icon(
-                      borderSide: BorderSide(color: Colors.black87),
-                      icon: Image.asset(
-                        'assets/images/1342004.png',
-                        fit: BoxFit.fitHeight,
+                    )
+                  else
+                    CircularProgressIndicator(),
+                  if (_isGoogleLoading)
+                    CircularProgressIndicator()
+                  else
+                    SizedBox(
+                      height: 37,
+                      child: OutlineButton.icon(
+                        borderSide: BorderSide(color: Colors.black87),
+                        icon: Image.asset(
+                          'assets/images/1342004.png',
+                          fit: BoxFit.fitHeight,
+                        ),
+                        label: Text('Sign in with google'),
+                        onPressed: () async {
+                          setState(() {
+                            _isGoogleLoading = true;
+                          });
+                          final result = await GoogleSignIn().signIn();
+                          final GoogleSignInAuthentication authentication =
+                              await result.authentication;
+                          final AuthCredential credentials =
+                              GoogleAuthProvider.getCredential(
+                                  idToken: authentication.idToken,
+                                  accessToken: authentication.accessToken);
+                          final re = await FirebaseAuth.instance
+                              .signInWithCredential(credentials)
+                              .then((value) =>
+                                  value.additionalUserInfo.isNewUser
+                                      ? Provider.of<Categories>(context,
+                                              listen: false)
+                                          .putInitialCategories(value.user.uid)
+                                      : null);
+                        },
                       ),
-                      label: Text('Sign in with google'),
-                      onPressed: () async {
-                        final result = await GoogleSignIn().signIn();
-                        final GoogleSignInAuthentication authentication =
-                            await result.authentication;
-                        final AuthCredential credentials =
-                            GoogleAuthProvider.getCredential(
-                                idToken: authentication.idToken,
-                                accessToken: authentication.accessToken);
-                        final authResult = await FirebaseAuth.instance
-                            .signInWithCredential(credentials)
-                            .then((value) =>
-                                Provider.of<Categories>(context, listen: false)
-                                    .putInitialCategories(value.user.uid));
-                      },
                     ),
-                  ),
                   FlatButton(
                     child: Text('${_isLogin ? 'Signup' : 'Login'} instead'),
                     onPressed: _isLoading

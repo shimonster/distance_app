@@ -36,11 +36,20 @@ class Categories extends ChangeNotifier {
   }
 
   Future<void> addCategory(String title) async {
+    final wifi = await Connectivity().checkConnectivity();
+    final isConnected =
+        wifi == ConnectivityResult.mobile || wifi == ConnectivityResult.wifi;
     try {
       if (uid != null) {
-        await Firestore.instance.document('users/$uid').setData({
-          'categories': [..._categories, title]
-        });
+        if (isConnected) {
+          await Firestore.instance.document('users/$uid').setData({
+            'categories': [..._categories, title]
+          });
+        } else {
+          Firestore.instance.document('users/$uid').setData({
+            'categories': [..._categories, title]
+          });
+        }
         _categories.add(title);
       } else {
         await SQLHelper.addCategory(title, uid ?? '', categories.length);
@@ -54,7 +63,6 @@ class Categories extends ChangeNotifier {
 
   Future<void> getCategories() async {
     final ConnectivityResult wifi = await Connectivity().checkConnectivity();
-    print(wifi);
     try {
       if (uid != null) {
         if (wifi != ConnectivityResult.none) {

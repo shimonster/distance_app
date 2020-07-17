@@ -16,7 +16,7 @@ class DistanceDisplayWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final distances = Provider.of<d.Distances>(context);
+    final distances = Provider.of<d.Distances>(context, listen: false);
     final dist =
         distances.distances.firstWhere((element) => element.id == distId);
 
@@ -129,8 +129,14 @@ class DistanceDisplayWidget extends StatelessWidget {
             footer: GridTileBar(
               backgroundColor: Colors.black54,
               title: Center(
-                child: Text(
-                  '${dist.distance.toStringAsFixed(3)} ${distances.preferredUnit}',
+                child: Consumer<d.Distances>(
+                  builder: (ctx, dists, _) {
+                    print(
+                        'from distance display widget: ${dists.preferredUnit}');
+                    return Text(
+                      '${(dists.computeTotalDist(dist.markers) / (dists.preferredUnit == 'Miles' ? 1609.344 : 1000)).toStringAsFixed(3)} ${dists.preferredUnit}',
+                    );
+                  },
                 ),
               ),
             ),

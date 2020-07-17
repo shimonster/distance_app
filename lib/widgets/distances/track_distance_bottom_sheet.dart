@@ -33,9 +33,9 @@ class _TrackDistanceBottomSheetState extends State<TrackDistanceBottomSheet> {
   }
 
   Widget _buildModalContent() {
+    bool isLoading = false;
     return StatefulBuilder(
       builder: (ctx, setModalState) {
-        bool isLoading = false;
         return Container(
           padding: EdgeInsets.all(10),
           child: SingleChildScrollView(
@@ -77,7 +77,6 @@ class _TrackDistanceBottomSheetState extends State<TrackDistanceBottomSheet> {
                         setModalState(() {
                           category = cat;
                         });
-                        print('new drop down value: $cat');
                       },
                       isExpanded: true,
                       items: Provider.of<Categories>(ctx, listen: false)
@@ -96,15 +95,13 @@ class _TrackDistanceBottomSheetState extends State<TrackDistanceBottomSheet> {
                           child: CircularProgressIndicator(),
                         )
                       : RaisedButton(
-                          child: isLoading
-                              ? CircularProgressIndicator()
-                              : Text('Finish'),
+                          child: Text('Finish'),
                           onPressed: () async {
-                            final distances =
-                                Provider.of<Distances>(ctx, listen: false);
                             setModalState(() {
                               isLoading = true;
                             });
+                            final distances =
+                                Provider.of<Distances>(ctx, listen: false);
                             print('start adding');
                             await distances.addDistance(
                                 name.text,
@@ -113,11 +110,10 @@ class _TrackDistanceBottomSheetState extends State<TrackDistanceBottomSheet> {
                                 category,
                                 widget._points,
                                 dist);
-                            print('finished adding');
                             setModalState(() {
-                              isLoading = false;
+                              isLoading = true;
                             });
-                            name.clear();
+                            name.text = '';
                             Navigator.of(ctx).pop();
                             if (Navigator.of(ctx).canPop()) {
                               Navigator.of(ctx).pop();
@@ -128,7 +124,7 @@ class _TrackDistanceBottomSheetState extends State<TrackDistanceBottomSheet> {
                       nameFocus.hasFocus)
                     Expanded(
                       child: Container(),
-                    )
+                    ),
                 ],
               ),
             ),
@@ -148,8 +144,8 @@ class _TrackDistanceBottomSheetState extends State<TrackDistanceBottomSheet> {
   @override
   Widget build(BuildContext context) {
     final distances = Provider.of<Distances>(context, listen: false);
-    dist = distances.computeTotalDist(widget._points);
-    print('bottomsheet build was run: ${widget._points}');
+    dist = distances.computeTotalDist(widget._points) /
+        (distances.preferredUnit == 'Miles' ? 1609.344 : 1000);
 
     return Container(
       width: double.infinity,

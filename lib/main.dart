@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
 import './providers/categories.dart';
 import './providers/distances.dart';
@@ -22,13 +21,6 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   var _account = true;
-  GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: <String>[
-      'email',
-      'https://www.googleapis.com/auth/contacts.readonly',
-    ],
-  );
-  GoogleSignInAccount _googleAccount;
   StreamSubscription _listener;
 
   void _switchMode() {
@@ -44,49 +36,22 @@ class _MyAppState extends State<MyApp> {
   }
 
   @override
-  void initState() {
-    _listener = _googleSignIn.onCurrentUserChanged.listen((account) {
-      print('authstate changed');
-      setState(() {
-        _googleAccount = account;
-      });
-    });
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return StreamBuilder(
       stream: FirebaseAuth.instance.onAuthStateChanged,
-      builder: (ctx, snapshot) {
-        print('builder was run');
+      builder: (ctx, AsyncSnapshot<FirebaseUser> snapshot) {
         print('auth snapshot: ${snapshot.data}');
-        print('google snapshot: ${_googleAccount}');
         return MultiProvider(
           providers: [
             ChangeNotifierProvider.value(
               value: Categories(
-                snapshot.data != null
-                    ? snapshot.data.uid
-                    : _googleAccount != null ? _googleAccount.id : null,
+                snapshot.data != null ? snapshot.data.uid : null,
               ),
             ),
-            ChangeNotifierProxyProvider<Categories, Distances>(
-              create: (ctx) => Distances(
-                snapshot.data != null
-                    ? snapshot.data.uid
-                    : _googleAccount != null ? _googleAccount.id : null,
-                [],
-                [],
-              ),
-              update: (ctx, cat, prev) => Distances(
-                snapshot.data != null
-                    ? snapshot.data.uid
-                    : _googleAccount != null ? _googleAccount.id : null,
-                cat.categories,
-                prev == null ? [] : prev.distances,
-              ),
-            ),
+            ChangeNotifierProvider.value(
+              value:
+                  Distances(snapshot.data != null ? snapshot.data.uid : null),
+            )
           ],
           child: MaterialApp(
             title: 'Distance App',
@@ -107,7 +72,7 @@ class _MyAppState extends State<MyApp> {
                       child: CircularProgressIndicator(),
                     ),
                   )
-                : snapshot.data != null || _googleAccount != null || !_account
+                : snapshot.data != null || !_account
                     ? DistancesScreen(_switchMode)
                     : AuthScreen(_switchMode),
             routes: {

@@ -16,7 +16,6 @@ class Distance {
     @required this.id,
     @required this.name,
     @required this.time,
-    @required this.distance,
     @required this.units,
     @required this.cat,
     @required this.markers,
@@ -25,7 +24,6 @@ class Distance {
   final String id;
   final String name;
   final DateTime time;
-  final double distance;
   final String units;
   final String cat;
   final List<Map<String, dynamic>> markers;
@@ -38,11 +36,10 @@ class Distance {
 }
 
 class Distances extends ChangeNotifier {
-  Distances(this.uid, this.categories, [this._distances]);
+  Distances(this.uid);
 
   final String uid;
-  String preferredUnit = 'Kilometers';
-  final List<String> categories;
+  String _preferredUnit;
   List<Distance> _distances = [];
   bool _isExpectingNew = false;
 
@@ -50,8 +47,12 @@ class Distances extends ChangeNotifier {
     return [..._distances.reversed];
   }
 
+  String get preferredUnit {
+    return _preferredUnit;
+  }
+
   Future<void> setUnit(String unit) async {
-    preferredUnit = unit;
+    _preferredUnit = unit;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('preferredUnit$uid', unit);
     notifyListeners();
@@ -60,8 +61,13 @@ class Distances extends ChangeNotifier {
   Future<void> getUnits() async {
     final prefs = await SharedPreferences.getInstance();
     if (prefs.containsKey('preferredUnit$uid')) {
-      preferredUnit = prefs.getString('preferredUnit$uid');
+      _preferredUnit = prefs.getString('preferredUnit$uid');
+    } else {
+      _preferredUnit = 'Kilometers';
     }
+    print('from provider: $preferredUnit');
+    notifyListeners();
+    print('after notification');
   }
 
   double computeTotalDist(List<Map<String, dynamic>> markers) {
@@ -70,12 +76,10 @@ class Distances extends ChangeNotifier {
     markers.forEach((element) {
       if (prevPoint != null) {
         final flatDis = mt.SphericalUtil.computeLength([
-              mt.LatLng(
-                  prevPoint['LatLng'].latitude, prevPoint['LatLng'].longitude),
-              mt.LatLng(
-                  element['LatLng'].latitude, element['LatLng'].longitude),
-            ]) /
-            (preferredUnit == 'Miles' ? 1609.34 : 1000);
+          mt.LatLng(
+              prevPoint['LatLng'].latitude, prevPoint['LatLng'].longitude),
+          mt.LatLng(element['LatLng'].latitude, element['LatLng'].longitude),
+        ]);
         final calcDis =
             sqrt(pow(flatDis, 2) + pow((element['alt'] - prevPoint['alt']), 2));
         distance += calcDis;
@@ -91,8 +95,8 @@ class Distances extends ChangeNotifier {
       String units,
       String category,
       List<Map<String, dynamic>> markers,
-      double distance,
       bool isWifi) async {
+    print('add to database markers length: ${markers.length}');
     try {
       final DocumentSnapshot result = isWifi
           ? await Firestore.instance
@@ -100,14 +104,12 @@ class Distances extends ChangeNotifier {
               .document()
               .get()
           : null;
-      print('after getting ref');
       await Firestore.instance
           .collection('users/$uid/distances')
           .document()
           .setData({
         'name': name,
         'time': time.toString(),
-        'distance': distance,
         'units': units,
         'category': category,
         'markers': markers
@@ -121,7 +123,7 @@ class Distances extends ChangeNotifier {
       });
       return result;
     } catch (error) {
-      print('there was an error in adding to database');
+      print('there was an error in adding to database: $error');
       throw error;
     }
   }
@@ -157,10 +159,9 @@ class Distances extends ChangeNotifier {
     try {
       if (uid != null) {
         if (isConnected) {
-          await addToDatabase(
-              name, time, units, category, markers, distance, true);
+          await addToDatabase(name, time, units, category, markers, true);
         } else {
-          addToDatabase(name, time, units, category, markers, distance, false);
+          addToDatabase(name, time, units, category, markers, false);
         }
       } else {
         SQLHelper.addDistance(
@@ -169,7 +170,7 @@ class Distances extends ChangeNotifier {
       notifyListeners();
     } on PlatformException catch (error) {
       print('add distance error: $error');
-      addToDatabase(name, time, units, category, markers, distance, false);
+      addToDatabase(name, time, units, category, markers, false);
       _isError = true;
       throw error;
     } catch (error) {
@@ -183,7 +184,6 @@ class Distances extends ChangeNotifier {
             id: time.toIso8601String(),
             name: name,
             time: time,
-            distance: distance,
             units: units,
             cat: category,
             markers: markers,
@@ -208,7 +208,6 @@ class Distances extends ChangeNotifier {
           id: dist.documentID,
           name: dist.data['name'],
           time: DateTime.parse(dist.data['time']),
-          distance: dist.data['distance'],
           units: dist.data['units'],
           cat: dist.data['category'],
           markers: marks,
@@ -220,11 +219,8 @@ class Distances extends ChangeNotifier {
   }
 
   Future<void> getDistances(BuildContext context) async {
-    print('got distances');
     final wifi = await Connectivity().checkConnectivity();
-    print('after conncetivity');
     final isConnected = wifi != ConnectivityResult.none;
-    print('is connected: $isConnected');
     try {
       if (uid != null) {
         final result = await Firestore.instance
@@ -259,7 +255,6 @@ class Distances extends ChangeNotifier {
         if (_distances.isEmpty ||
             (_distances.last.time.difference(DateTime.now()).inSeconds < 2 &&
                 _isExpectingNew)) {
-          print('about to get distances');
           getDistances(context);
         }
       },

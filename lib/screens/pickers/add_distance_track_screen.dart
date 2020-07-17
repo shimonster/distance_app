@@ -35,7 +35,7 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
 
   static const _isolateName = 'LocationIsolate';
   static const _distanceFilter = 10.0;
-  static const _interval = 10;
+  static const _interval = 1;
   static const _initialZoom = 18.0;
 
   @override
@@ -63,14 +63,14 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
   @override
   void initState() {
     super.initState();
-    Location().getLocation().then(
-          (value) => _addPoint(
-            {
-              'LatLng': LatLng(value.latitude, value.longitude),
-              'alt': value.altitude //event.altitude
-            },
-          ),
-        );
+//    Location().getLocation().then(
+//          (value) => _addPoint(
+//            {
+//              'LatLng': LatLng(value.latitude, value.longitude),
+//              'alt': value.altitude //event.altitude
+//            },
+//          ),
+//        );
     Location().requestPermission();
     Location().changeSettings(
         interval: _interval * 1000,
@@ -116,14 +116,14 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
   }
 
   void _addPoint(Map<String, dynamic> loc) {
-    print('length of points: $_points');
     final addMap = {
       ...loc,
       'time': DateTime.now(),
     };
-    print(_points.length);
     if (_points.isNotEmpty) {
-      if (_points.last != addMap) {
+      final dist = d.Distances('').computeTotalDist([addMap, _points.last]);
+      if (dist > 10) {
+        print('dist: $dist');
         setState(() {
           _points.add(addMap);
         });
@@ -133,8 +133,8 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
         _points.add(addMap);
       });
     }
-    if (_isAtLastPoint) {
-      if (_mapController.ready) {
+    if (_mapController.ready) {
+      if (_mapController.center == _points.last['LatLng']) {
         _mapController.move(_points.last['LatLng'], _mapController.zoom);
       }
     }

@@ -121,6 +121,7 @@ class DistanceDetailsScreen extends StatelessWidget {
                     options: MapOptions(
                       maxZoom: 19,
                       center: pInfo['center'],
+                      interactive: false,
                       zoom: pInfo['zoom'],
                     ),
                     layers: [
@@ -130,16 +131,6 @@ class DistanceDetailsScreen extends StatelessWidget {
                         subdomains: ['a', 'b', 'c'],
                       ),
                       MarkerLayerOptions(
-//                                  markers: _points.expand((element) {
-//                                final List<Marker> markers = [];
-//                                for (var i = 0; i < 5000; i++) {
-//                                  markers.add(_buildMarker({
-//                                    'LatLng': LatLng(i / 1000, 0),
-//                                    'alt': (i - 150) * 10
-//                                  }));
-//                                }
-//                                return markers;
-//                              }).toList()
                         markers:
                             dist.markers.map((e) => _buildMarker(e)).toList(),
                       ),
@@ -188,11 +179,11 @@ class DistanceDetailsScreen extends StatelessWidget {
                     _buildInfoText(false,
                         'End: ${DateFormat('jms').format(dist.markers.last['time'])}'),
                     _buildInfoText(false,
-                        'Average Speed: ${(dist.distance / (distTime.inSeconds / 3600)).toStringAsFixed(2)}  ${distances.preferredUnit == 'Miles' ? 'mph' : 'kph'}'),
+                        'Average Speed: ${((distances.computeTotalDist(dist.markers) / (distances.preferredUnit == 'Miles' ? 1609.344 : 1000)) / (distTime.inSeconds / 3600)).toStringAsFixed(2)}  ${distances.preferredUnit == 'Miles' ? 'mph' : 'kph'}'),
                     Divider(),
                     _buildInfoText(true, 'Path Info'),
                     _buildInfoText(false,
-                        'Distance: ${dist.distance.toStringAsFixed(2)} ${dist.units}'),
+                        'Distance: ${(distances.computeTotalDist(dist.markers) / (distances.preferredUnit == 'Miles' ? 1609.344 : 1000)).toStringAsFixed(2)} ${dist.units}'),
                     _buildInfoText(false,
                         'Lowest Altitude: ${pInfo['minAlt'].toStringAsFixed(2)}'),
                     _buildInfoText(false,

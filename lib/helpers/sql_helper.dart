@@ -4,7 +4,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:latlong/latlong.dart' as ll;
-import 'package:maps_toolkit/maps_toolkit.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/distances.dart';
@@ -98,28 +97,11 @@ class SQLHelper {
         }
       });
       pointList.forEach((key, value) {
-        var distance = 0.0;
-        Map<String, dynamic> prevPoint;
-        value.forEach((element) {
-          if (prevPoint != null) {
-            final flatDis = SphericalUtil.computeLength([
-              LatLng(
-                  prevPoint['lat'] / 100000000, prevPoint['lng'] / 100000000),
-              LatLng(element['lat'] / 100000000, element['lng'] / 100000000),
-            ]);
-            distance += sqrt(
-                pow(flatDis, 2) + pow(element['alt'] - prevPoint['alt'], 2));
-          }
-          prevPoint = element;
-        });
-//        print('after computing dist');
-//        print([key, value]);
         distances.add(
           Distance(
             id: key,
             name: value[0]['name'],
             time: DateTime.parse(value[0]['time']),
-            distance: distance,
             markers: value
                 .map((e) => {
                       'LatLng':

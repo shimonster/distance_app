@@ -39,14 +39,13 @@ class _DistanceDrawerState extends State<DistanceDrawer> {
 
   @override
   void initState() {
+    super.initState();
     Provider.of<Distances>(context, listen: false).getUnits().then(
           (value) => setState(() {
             preferredUnits =
                 Provider.of<Distances>(context, listen: false).preferredUnit;
           }),
         );
-
-    super.initState();
   }
 
   @override
@@ -98,9 +97,10 @@ class _DistanceDrawerState extends State<DistanceDrawer> {
                     await cats.getCategories();
                     _isInit = true;
                   })
-                : Future.delayed(Duration()),
+                : null,
             builder: (ctx, snapshot) => snapshot.connectionState ==
-                    ConnectionState.waiting
+                        ConnectionState.waiting &&
+                    snapshot.connectionState != ConnectionState.none
                 ? Center(
                     child: CircularProgressIndicator(),
                   )
@@ -200,12 +200,13 @@ class _DistanceDrawerState extends State<DistanceDrawer> {
                                                 color: Theme.of(context)
                                                     .primaryColor,
                                               ),
-                                        onPressed: _name.text == ''
-                                            ? null
-                                            : () async {
-                                                await addCat();
-                                                _name.clear();
-                                              },
+                                        onPressed:
+                                            _name.text == '' || _isProcessingAdd
+                                                ? null
+                                                : () async {
+                                                    await addCat();
+                                                    _name.clear();
+                                                  },
                                       ),
                                     ],
                                   ),

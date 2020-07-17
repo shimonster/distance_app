@@ -8,7 +8,7 @@ import '../lib/providers/distances.dart';
 void main() {
   group('Distance Caluclator', () {
     test('value should be 0 for 0 points', () {
-      final distances = Distances('test1', []);
+      final distances = Distances('test1');
 
       distances.computeTotalDist([]);
 
@@ -16,7 +16,7 @@ void main() {
     });
 
     test('value should be 0 for 1 points', () {
-      final distances = Distances('test2', []);
+      final distances = Distances('test2');
 
       distances.computeTotalDist([
         {
@@ -30,7 +30,7 @@ void main() {
     });
 
     test('value should be 58.82m for 2 points', () {
-      final distances = Distances('test3', []);
+      final distances = Distances('test3');
 
       distances.computeTotalDist([
         {
@@ -49,7 +49,7 @@ void main() {
     });
 
     test('value should be 157000 for 2 points', () {
-      final distances = Distances('sdfasdf', []);
+      final distances = Distances('sdfasdf');
 
       distances.computeTotalDist([
         {
