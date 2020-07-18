@@ -37,6 +37,7 @@ class _TrackDistanceBottomSheetState extends State<TrackDistanceBottomSheet> {
     return StatefulBuilder(
       builder: (ctx, setModalState) {
         return Container(
+          color: Theme.of(context).scaffoldBackgroundColor,
           padding: EdgeInsets.all(10),
           child: SingleChildScrollView(
             child: Container(

@@ -56,13 +56,31 @@ class _MyAppState extends State<MyApp> {
           child: MaterialApp(
             title: 'Distance App',
             theme: ThemeData(
-              primarySwatch: Colors.blue,
-              accentColor: Color.fromARGB(1000, 184, 115, 51),
+//              primaryColor: Color.fromRGBO(191, 154, 202, 1),
+//              primaryColorLight: Color.fromRGBO(212, 188, 220, 1),
+//              primaryColorDark: Color.fromRGBO(152, 95, 171, 1),
+//              accentColor: Color.fromRGBO(199, 232, 243, 1),
+//              backgroundColor: Color.fromRGBO(245, 249, 241, 1),
+//              scaffoldBackgroundColor: Color.fromRGBO(245, 249, 241, 1),
+//
+//              primaryColor: Color.fromRGBO(30, 204, 114, 1),
+//              primaryColorLight: Color.fromRGBO(191, 214, 255, 1),
+//              primaryColorDark: Color.fromRGBO(0, 148, 67, 1),
+//              accentColor: Color.fromRGBO(212, 89, 36, 1),
+//              backgroundColor: Color.fromRGBO(26, 9, 100, 1),
+//              scaffoldBackgroundColor: Color.fromRGBO(255, 235, 219, 1),
+//
+              primaryColor: Color.fromRGBO(126, 144, 241, 1),
+              primaryColorLight: Color.fromRGBO(212, 166, 230, 1),
+              primaryColorDark: Color.fromRGBO(121, 104, 184, 1),
+              accentColor: Color.fromRGBO(237, 120, 90, 1),
+              backgroundColor: Color.fromRGBO(255, 213, 173, 1),
+              scaffoldBackgroundColor: Color.fromRGBO(255, 213, 173, 1),
               buttonTheme: ButtonTheme.of(context).copyWith(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(100),
                 ),
-                buttonColor: Colors.blue,
+                buttonColor: Color.fromRGBO(237, 120, 90, 1),
                 textTheme: ButtonTextTheme.primary,
               ),
             ),

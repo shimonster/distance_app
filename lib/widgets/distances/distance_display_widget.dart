@@ -66,6 +66,7 @@ class DistanceDisplayWidget extends StatelessWidget {
             MaterialPageRoute(builder: (ctx) => DistanceDetailsScreen(dist)));
       },
       child: Container(
+//        margin: EdgeInsets.only(top: 10, bo),
         decoration: BoxDecoration(
           border: Border.all(width: 5, color: Theme.of(context).accentColor),
           borderRadius: BorderRadius.circular(10),

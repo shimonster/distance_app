@@ -77,37 +77,35 @@ class _DistancesScreenState extends State<DistancesScreen> {
                 ? Center(
                     child: CircularProgressIndicator(),
                   )
-                : Padding(
-                    padding: EdgeInsets.all(10),
-                    child: GridView.builder(
-                      itemCount: _category == 'All'
-                          ? distances.distances.length + 1
-                          : distanceCats.length + 1,
-                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                        mainAxisSpacing: 10,
-                        crossAxisSpacing: 10,
-                        childAspectRatio: 6 / 5,
-                        maxCrossAxisExtent: 300,
-                      ),
-                      itemBuilder: (ctx, i) {
-                        if (i !=
-                            (_category == 'All'
-                                ? distances.distances.length
-                                : distanceCats.length)) {
-                          return DistanceDisplayWidget(
-                              _category == 'All'
-                                  ? distances.distances[i].id
-                                  : distances.distances
-                                      .where(
-                                          (element) => element.cat == _category)
-                                      .toList()[i]
-                                      .id,
-                              ValueKey(distances.distances[i].id));
-                        } else {
-                          return AddDistanceWidget(rebuild);
-                        }
-                      },
+                : GridView.builder(
+                    itemCount: _category == 'All'
+                        ? distances.distances.length + 1
+                        : distanceCats.length + 1,
+                    gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                      mainAxisSpacing: 10,
+                      crossAxisSpacing: 10,
+                      childAspectRatio: 6 / 5,
+                      maxCrossAxisExtent: 300,
                     ),
+                    padding: EdgeInsets.all(10),
+                    itemBuilder: (ctx, i) {
+                      if (i !=
+                          (_category == 'All'
+                              ? distances.distances.length
+                              : distanceCats.length)) {
+                        return DistanceDisplayWidget(
+                            _category == 'All'
+                                ? distances.distances[i].id
+                                : distances.distances
+                                    .where(
+                                        (element) => element.cat == _category)
+                                    .toList()[i]
+                                    .id,
+                            ValueKey(distances.distances[i].id));
+                      } else {
+                        return AddDistanceWidget(rebuild);
+                      }
+                    },
                   ),
       ),
     );

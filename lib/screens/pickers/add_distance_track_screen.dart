@@ -74,7 +74,7 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
     Location().requestPermission();
     Location().changeSettings(
         interval: _interval * 1000,
-        distanceFilter: _distanceFilter,
+        distanceFilter: _points.isEmpty ? 0 : _distanceFilter,
         accuracy: LocationAccuracy.high);
     _mapController.onReady.then((value) =>
         _isAtLastPoint = _mapController.center == _points.last['LatLng']);
@@ -141,14 +141,14 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
   }
 
   Marker _buildMarker(Map<String, dynamic> point) {
-    final int calcAlt = (sqrt(max(point['alt'] + 1300, 0)) * 1.84).round();
+    final int calcAlt = (sqrt(max(point['alt'] + 1200, 0)) * 2).round();
     return Marker(
       point: point['LatLng'],
       width: 9,
       builder: (ctx) => CircleAvatar(
         backgroundColor: point['alt'] <= 0
             ? Color.fromRGBO(0, 255, 0, 1)
-            : point['alt'] > 30000
+            : point['alt'] > 17000
                 ? Colors.white
                 : Color.fromRGBO(
                     min((calcAlt).round(), 255),
@@ -180,7 +180,7 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
                             mapController: _mapController,
                             options: MapOptions(
                               maxZoom: 19,
-                              center: _points.last['LatLng'],
+                              center: LatLng(0, 0), //_points.last['LatLng'],
                               zoom: _initialZoom,
                               onPositionChanged: (pos, _) {
                                 if (_points.isNotEmpty) {
@@ -197,20 +197,20 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
                                 subdomains: ['a', 'b', 'c'],
                               ),
                               MarkerLayerOptions(
-//                                  markers: _points.expand((element) {
-//                                final List<Marker> markers = [];
-//                                for (var i = 0; i < 5000; i++) {
-//                                  markers.add(_buildMarker({
-//                                    'LatLng': LatLng(i / 1000, 0),
-//                                    'alt': (i - 150) * 10
-//                                  }));
-//                                }
-//                                return markers;
-//                              }).toList()
-                                markers: _points
-                                    .map((e) => _buildMarker(e))
-                                    .toList(),
-                              ),
+                                  markers: _points.expand((element) {
+                                final List<Marker> markers = [];
+                                for (var i = 0; i < 5000; i++) {
+                                  markers.add(_buildMarker({
+                                    'LatLng': LatLng(i / 1000, 0),
+                                    'alt': (i - 150) * 10
+                                  }));
+                                }
+                                return markers;
+                              }).toList()
+//                                markers: _points
+//                                    .map((e) => _buildMarker(e))
+//                                    .toList(),
+                                  ),
                             ],
                           ),
                   ),
