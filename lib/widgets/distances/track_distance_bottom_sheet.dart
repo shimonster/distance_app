@@ -162,14 +162,14 @@ class _TrackDistanceBottomSheetState extends State<TrackDistanceBottomSheet> {
                   Text(
                     'Current Distance: ${dist.toStringAsFixed(3)} ${distances.preferredUnit}',
                     style: TextStyle(
-                      color: Theme.of(context).accentColor,
+                      color: Theme.of(context).primaryColorDark,
                       fontSize: 17,
                     ),
                   ),
                   Text(
                     'Points: ${widget._points.length}',
                     style: TextStyle(
-                      color: Theme.of(context).accentColor,
+                      color: Theme.of(context).primaryColorDark,
                       fontSize: 17,
                     ),
                   ),
@@ -179,34 +179,36 @@ class _TrackDistanceBottomSheetState extends State<TrackDistanceBottomSheet> {
           ),
           Padding(
             padding: EdgeInsets.symmetric(vertical: 8, horizontal: 15),
-            child: InkWell(
-              onTap: () {
+            child: RaisedButton.icon(
+              onPressed: () {
                 _submitDistance();
               },
-              borderRadius: BorderRadius.circular(100),
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 11, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).accentColor,
-                  borderRadius: BorderRadius.circular(100),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Icon(
-                      Icons.check,
-                      color: Colors.white,
-                    ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Text(
-                      'Finish',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ],
-                ),
+              icon: Icon(Icons.check),
+              label: Text(
+                'Finish',
+                style: TextStyle(color: Colors.white),
               ),
+              color: Theme.of(context).primaryColorDark,
+//              Container(
+//                padding: EdgeInsets.symmetric(horizontal: 11, vertical: 8),
+//                decoration: BoxDecoration(
+//                  color: Theme.of(context).accentColor,
+//                  borderRadius: BorderRadius.circular(100),
+//                ),
+//                child: Row(
+//                  mainAxisSize: MainAxisSize.min,
+//                  children: <Widget>[
+//                    Icon(
+//                      Icons.check,
+//                      color: Colors.white,
+//                    ),
+//                    SizedBox(
+//                      width: 10,
+//                    ),
+//
+//                  ],
+//                ),
+//              ),
             ),
           ),
         ],

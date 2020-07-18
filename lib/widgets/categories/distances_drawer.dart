@@ -117,30 +117,23 @@ class _DistanceDrawerState extends State<DistanceDrawer> {
                                         i == cats.categories.length - 1 ? 0 : 8,
                                     left: 8,
                                     right: 8),
-                                child: InkWell(
-                                  borderRadius: BorderRadius.circular(10),
-                                  splashColor:
-                                      Theme.of(context).primaryColorLight,
-                                  onTap: () {
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                      width: 2,
+                                      color:
+                                          Theme.of(context).primaryColorDark),
+                                  borderRadius: BorderRadius.circular(100),
+                                ),
+                                child: RaisedButton(
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                  onPressed: () {
                                     widget.selectCategory(cats.categories[i]);
                                   },
-                                  child: Card(
-                                    elevation: 1,
-                                    color: Theme.of(context).accentColor,
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(10)),
-                                    child: Container(
-                                      padding: EdgeInsets.all(10),
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                            width: 0.5,
-                                            color: Theme.of(context)
-                                                .primaryColorDark),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: Text(cats.categories[i]),
-                                    ),
+                                  child: Row(
+                                    children: <Widget>[
+                                      Text(cats.categories[i]),
+                                    ],
                                   ),
                                 ),
                               )
@@ -149,17 +142,6 @@ class _DistanceDrawerState extends State<DistanceDrawer> {
                                     label: Text('Add Category'),
                                     icon: Icon(Icons.create_new_folder),
                                     textColor: Theme.of(context).primaryColor,
-//                                    label: Row(
-//                                      mainAxisAlignment:
-//                                          MainAxisAlignment.center,
-//                                      children: <Widget>[
-//                                        Icon(Icons.create_new_folder, color: Theme.of(context).primaryColor,),
-//                                        SizedBox(
-//                                          width: 10,
-//                                        ),
-//                                        Text('Add Category', style: Col,)
-//                                      ],
-//                                    ),
                                     onPressed: () {
                                       setState(() {
                                         _isAdding = true;
@@ -174,10 +156,10 @@ class _DistanceDrawerState extends State<DistanceDrawer> {
                                         EdgeInsets.symmetric(horizontal: 10),
                                     decoration: BoxDecoration(
                                       border: Border.all(
-                                        width: 0.5,
+                                        width: 2,
                                         color: Theme.of(context).primaryColor,
                                       ),
-                                      borderRadius: BorderRadius.circular(10),
+                                      borderRadius: BorderRadius.circular(100),
                                     ),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
@@ -208,16 +190,15 @@ class _DistanceDrawerState extends State<DistanceDrawer> {
                                           ),
                                         ),
                                         IconButton(
+                                          color: Theme.of(context).primaryColor,
+                                          padding: EdgeInsets.all(1),
                                           icon: _isProcessingAdd
                                               ? FittedBox(
                                                   child:
                                                       CircularProgressIndicator(),
                                                 ) //Icon(Icons.cloud_upload)
                                               : Icon(
-                                                  Icons.check_circle_outline,
-                                                  color: Theme.of(context)
-                                                      .primaryColor,
-                                                ),
+                                                  Icons.check_circle_outline),
                                           onPressed: _name.text == '' ||
                                                   _isProcessingAdd
                                               ? null

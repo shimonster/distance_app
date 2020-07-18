@@ -1,0 +1,17 @@
+- colors:
+    primaryLightRGBO:
+        [187, 230, 228, 1]
+    primaryRGBO:
+        [66, 191, 221, 1]
+    primaryDarkRGBO:
+        [8, 75, 131, 1]
+    accentRGBO:
+        [252, 163, 17, 1]
+    scaffoldRGBO:
+        [255, 232, 189, 1]
+    appBarContentRGBO:
+        [255, 255, 255, 1]
+    buttonTextRBGO:
+        [255, 255, 255, 1]
+    bottonColorRGBO:
+        [8, 75, 131, 1]

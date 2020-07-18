@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:provider/provider.dart';
@@ -60,19 +61,31 @@ class DistanceDisplayWidget extends StatelessWidget {
 
     _mapController.onReady.then((value) =>
         _mapController.move(zoomCenter['center'], _mapController.zoom));
-    return InkWell(
-      onTap: () {
-        Navigator.of(context).push(
-            MaterialPageRoute(builder: (ctx) => DistanceDetailsScreen(dist)));
-      },
-      child: Container(
-//        margin: EdgeInsets.only(top: 10, bo),
-        decoration: BoxDecoration(
-          border: Border.all(width: 5, color: Theme.of(context).accentColor),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(5),
+
+    const radius = BorderRadius.only(
+      topRight: Radius.circular(13),
+      topLeft: Radius.circular(2),
+      bottomLeft: Radius.circular(13),
+      bottomRight: Radius.circular(2),
+    );
+    return Card(
+      margin: EdgeInsets.all(5),
+      shape: RoundedRectangleBorder(
+        borderRadius: radius,
+      ),
+      elevation: 10,
+      shadowColor: Theme.of(context).accentColor,
+      child: ClipRRect(
+        borderRadius: radius,
+        child: InkWell(
+          splashColor: Colors.white,
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (ctx) => DistanceDetailsScreen(dist),
+              ),
+            );
+          },
           child: GridTile(
             child: Stack(
               children: <Widget>[
