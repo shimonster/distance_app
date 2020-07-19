@@ -119,7 +119,6 @@ class DistanceDetailsScreen extends StatelessWidget {
                   tag: dist.id,
                   child: FlutterMap(
                     options: MapOptions(
-                      maxZoom: 19,
                       center: pInfo['center'],
                       interactive: false,
                       zoom: pInfo['zoom'],
@@ -183,7 +182,7 @@ class DistanceDetailsScreen extends StatelessWidget {
                     Divider(),
                     _buildInfoText(true, 'Path Info'),
                     _buildInfoText(false,
-                        'Distance: ${(distances.computeTotalDist(dist.markers) / (distances.preferredUnit == 'Miles' ? 1609.344 : 1000)).toStringAsFixed(2)} ${dist.units}'),
+                        'Distance: ${(distances.computeTotalDist(dist.markers) / (distances.preferredUnit == 'Miles' ? 1609.344 : 1000)).toStringAsFixed(2)} ${distances.preferredUnit == 'Miles' ? 'Miles' : 'Kilometers'}'),
                     _buildInfoText(false,
                         'Lowest Altitude: ${pInfo['minAlt'].toStringAsFixed(2)}'),
                     _buildInfoText(false,

@@ -16,7 +16,6 @@ class Distance {
     @required this.id,
     @required this.name,
     @required this.time,
-    @required this.units,
     @required this.cat,
     @required this.markers,
   });
@@ -24,7 +23,6 @@ class Distance {
   final String id;
   final String name;
   final DateTime time;
-  final String units;
   final String cat;
   final List<Map<String, dynamic>> markers;
 
@@ -184,7 +182,6 @@ class Distances extends ChangeNotifier {
             id: time.toIso8601String(),
             name: name,
             time: time,
-            units: units,
             cat: category,
             markers: markers,
           ),
@@ -208,7 +205,6 @@ class Distances extends ChangeNotifier {
           id: dist.documentID,
           name: dist.data['name'],
           time: DateTime.parse(dist.data['time']),
-          units: dist.data['units'],
           cat: dist.data['category'],
           markers: marks,
         ),

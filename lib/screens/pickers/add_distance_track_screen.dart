@@ -122,7 +122,7 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
     };
     if (_points.isNotEmpty) {
       final dist = d.Distances('').computeTotalDist([addMap, _points.last]);
-      if (dist > 10) {
+      if (dist > _distanceFilter) {
         print('dist: $dist');
         setState(() {
           _points.add(addMap);
@@ -200,10 +200,12 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
                                   markers: _points.expand((element) {
                                 final List<Marker> markers = [];
                                 for (var i = 0; i < 5000; i++) {
-                                  markers.add(_buildMarker({
-                                    'LatLng': LatLng(i / 1000, 0),
-                                    'alt': (i - 150) * 10
-                                  }));
+                                  markers.add(
+                                    _buildMarker({
+                                      'LatLng': LatLng(i / 1000, 0),
+                                      'alt': (i - 150) * 10
+                                    }),
+                                  );
                                 }
                                 return markers;
                               }).toList()

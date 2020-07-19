@@ -189,26 +189,6 @@ class _TrackDistanceBottomSheetState extends State<TrackDistanceBottomSheet> {
                 style: TextStyle(color: Colors.white),
               ),
               color: Theme.of(context).primaryColorDark,
-//              Container(
-//                padding: EdgeInsets.symmetric(horizontal: 11, vertical: 8),
-//                decoration: BoxDecoration(
-//                  color: Theme.of(context).accentColor,
-//                  borderRadius: BorderRadius.circular(100),
-//                ),
-//                child: Row(
-//                  mainAxisSize: MainAxisSize.min,
-//                  children: <Widget>[
-//                    Icon(
-//                      Icons.check,
-//                      color: Colors.white,
-//                    ),
-//                    SizedBox(
-//                      width: 10,
-//                    ),
-//
-//                  ],
-//                ),
-//              ),
             ),
           ),
         ],

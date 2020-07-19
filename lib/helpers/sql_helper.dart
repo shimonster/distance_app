@@ -111,7 +111,6 @@ class SQLHelper {
                     })
                 .toList(),
             cat: value[0]['cat'],
-            units: Provider.of<Distances>(context, listen: false).preferredUnit,
           ),
         );
         print('added to distances');

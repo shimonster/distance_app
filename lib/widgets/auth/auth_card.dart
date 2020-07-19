@@ -27,7 +27,6 @@ class _AuthCardState extends State<AuthCard> {
   bool _isGoogleLoading = false;
 
   Future<void> _authenticate() async {
-    print('authenticating');
     final auth = FirebaseAuth.instance;
     if (_form.currentState.validate()) {
       try {
@@ -36,10 +35,10 @@ class _AuthCardState extends State<AuthCard> {
         });
         _form.currentState.save();
         if (_isLogin) {
-          final result = await auth.signInWithEmailAndPassword(
+          await auth.signInWithEmailAndPassword(
               email: email, password: password);
         } else {
-          final result = await auth
+          await auth
               .createUserWithEmailAndPassword(email: email, password: password)
               .then((value) => Provider.of<Categories>(context, listen: false)
                   .putInitialCategories(value.user.uid));
