@@ -65,6 +65,7 @@ flutter:
      - assets/images/distance.jpg
      - assets/images/distance_markers.jpg
      - assets/images/1342004.png
+     - assets/style/style.yaml
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

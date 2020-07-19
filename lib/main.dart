@@ -1,18 +1,16 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:yaml/yaml.dart';
-import 'package:checked_yaml/checked_yaml.dart' as y;
-import 'package:flutter/services.dart';
 
 import './providers/categories.dart';
 import './providers/distances.dart';
 import './screens/auth/auth_screen.dart';
 import './screens/distances/distances_screen.dart';
 import './screens/pickers/add_distance_track_screen.dart';
+import 'helpers/style.dart';
 
 void main() {
   runApp(MyApp());
@@ -20,17 +18,28 @@ void main() {
 
 class MyApp extends StatefulWidget {
   @override
-  _MyAppState createState() => _MyAppState();
+  MyAppState createState() => MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class MyAppState extends State<MyApp> with ChangeNotifier {
   var _account = true;
   StreamSubscription _listener;
-  String file;
+  Map style;
 
   void _switchMode() {
     setState(() {
       _account = !_account;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    Style().getData().then((value) {
+      setState(() {
+        style = value;
+      });
+      print('then block');
     });
   }
 
@@ -40,20 +49,9 @@ class _MyAppState extends State<MyApp> {
     _listener.cancel();
   }
 
-  Future<void> getStyle() async {
-    final data = await rootBundle.loadString('assets/style/style.yaml');
-    final style = loadYaml(data);
-    print(style);
-  }
-
-  @override
-  void initState() {
-    getStyle();
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
+    print('main build: $style');
     return StreamBuilder(
       stream: FirebaseAuth.instance.onAuthStateChanged,
       builder: (ctx, AsyncSnapshot<FirebaseUser> snapshot) {
@@ -68,7 +66,10 @@ class _MyAppState extends State<MyApp> {
             ChangeNotifierProvider.value(
               value:
                   Distances(snapshot.data != null ? snapshot.data.uid : null),
-            )
+            ),
+            ChangeNotifierProvider.value(
+              value: this,
+            ),
           ],
           child: MaterialApp(
             title: 'Distance App',
@@ -94,12 +95,56 @@ class _MyAppState extends State<MyApp> {
 //              backgroundColor: Color.fromRGBO(255, 213, 173, 1),
 //              scaffoldBackgroundColor: Color.fromRGBO(255, 213, 173, 1),
 //
-              primaryColorLight: Color.fromRGBO(187, 230, 228, 1),
-              primaryColor: Color.fromRGBO(66, 191, 221, 1),
-              primaryColorDark: Color.fromRGBO(8, 75, 131, 1),
-              accentColor: Color.fromRGBO(252, 163, 17, 1),
-              backgroundColor: Color.fromRGBO(255, 232, 189, 1),
-              scaffoldBackgroundColor: Color.fromRGBO(255, 232, 189, 1),
+              primaryColorLight: style == null
+                  ? Colors.lightBlue
+                  : Color.fromRGBO(
+                      style['appStyle']['colors']['primaryLightRGBO'][0],
+                      style['appStyle']['colors']['primaryLightRGBO'][1],
+                      style['appStyle']['colors']['primaryLightRGBO'][2],
+                      style['appStyle']['colors']['primaryLightRGBO'][3]
+                          .toDouble(),
+                    ),
+              primaryColor: style == null
+                  ? Colors.blue
+                  : Color.fromRGBO(
+                      style['appStyle']['colors']['primaryRGBO'][0],
+                      style['appStyle']['colors']['primaryRGBO'][1],
+                      style['appStyle']['colors']['primaryRGBO'][2],
+                      style['appStyle']['colors']['primaryRGBO'][3].toDouble(),
+                    ),
+              primaryColorDark: style == null
+                  ? Colors.blue[900]
+                  : Color.fromRGBO(
+                      style['appStyle']['colors']['primaryDarkRGBO'][0],
+                      style['appStyle']['colors']['primaryDarkRGBO'][1],
+                      style['appStyle']['colors']['primaryDarkRGBO'][2],
+                      style['appStyle']['colors']['primaryDarkRGBO'][3]
+                          .toDouble(),
+                    ),
+              accentColor: style == null
+                  ? Colors.yellowAccent
+                  : Color.fromRGBO(
+                      style['appStyle']['colors']['accentRGBO'][0],
+                      style['appStyle']['colors']['accentRGBO'][1],
+                      style['appStyle']['colors']['accentRGBO'][2],
+                      style['appStyle']['colors']['accentRGBO'][3].toDouble(),
+                    ),
+              backgroundColor: style == null
+                  ? Colors.white
+                  : Color.fromRGBO(
+                      style['appStyle']['colors']['scaffoldRGBO'][0],
+                      style['appStyle']['colors']['scaffoldRGBO'][1],
+                      style['appStyle']['colors']['scaffoldRGBO'][2],
+                      style['appStyle']['colors']['scaffoldRGBO'][3].toDouble(),
+                    ),
+              scaffoldBackgroundColor: style == null
+                  ? Colors.white
+                  : Color.fromRGBO(
+                      style['appStyle']['colors']['scaffoldRGBO'][0],
+                      style['appStyle']['colors']['scaffoldRGBO'][1],
+                      style['appStyle']['colors']['scaffoldRGBO'][2],
+                      style['appStyle']['colors']['scaffoldRGBO'][3].toDouble(),
+                    ),
               fontFamily: 'Nunito',
               textTheme: TextTheme(
                 button: TextStyle(
@@ -122,9 +167,17 @@ class _MyAppState extends State<MyApp> {
               ),
               buttonTheme: ButtonTheme.of(context).copyWith(
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(100),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                buttonColor: Color.fromRGBO(8, 75, 131, 1),
+                buttonColor: style == null
+                    ? Colors.blue[900]
+                    : Color.fromRGBO(
+                        style['appStyle']['colors']['primaryLightRGBO'][0],
+                        style['appStyle']['colors']['primaryLightRGBO'][1],
+                        style['appStyle']['colors']['primaryLightRGBO'][2],
+                        style['appStyle']['colors']['primaryLightRGBO'][3]
+                            .toDouble(),
+                      ),
                 textTheme: ButtonTextTheme.primary,
               ),
             ),

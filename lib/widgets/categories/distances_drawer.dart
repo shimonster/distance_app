@@ -120,9 +120,8 @@ class _DistanceDrawerState extends State<DistanceDrawer> {
                                 decoration: BoxDecoration(
                                   border: Border.all(
                                       width: 2,
-                                      color:
-                                          Theme.of(context).primaryColorDark),
-                                  borderRadius: BorderRadius.circular(100),
+                                      color: Theme.of(context).primaryColor),
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: RaisedButton(
                                   materialTapTargetSize:
