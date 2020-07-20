@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:distanceapp/providers/distances.dart';
-import 'package:distanceapp/providers/categories.dart';
+import 'package:distanceapp/widget/distances/track_distance_modal_bottom_sheet.dart'
 import 'package:distanceapp/main.dart';
 
 class TrackDistanceBottomSheet extends StatefulWidget {
@@ -30,22 +30,10 @@ class _TrackDistanceBottomSheetState extends State<TrackDistanceBottomSheet> {
         .computeTotalDist(widget._points);
   }
 
-  Widget _buildModalContent() {
-    final mainStyle = Provider.of<MyAppState>(context, listen: false).style;
-    final style = mainStyle['appStyle']['distanceDisplayWidget'];
-
-    bool isLoading = false;
-    return StatefulBuilder(
-      builder: (ctx, setModalState) {
-        return
-      },
-    );
-  }
-
   Future<void> _submitDistance() async {
     showModalBottomSheet(
       context: context,
-      builder: (ctx) => _buildModalContent(),
+      builder: (ctx) => TrackDistanceModalBottomSheet(widget._points, dist),
     );
   }
 

@@ -6,6 +6,11 @@ import 'package:distanceapp/providers/categories.dart';
 import 'package:distanceapp/main.dart';
 
 class AddDistanceModalBottomSheet extends StatefulWidget {
+  AddDistanceModalBottomSheet(this._points, this.dist);
+
+  final List<Map<String, dynamic>> _points;
+  final Distance dist;
+
   @override
   _AddDistanceModalBottomSheetState createState() =>
       _AddDistanceModalBottomSheetState();
@@ -97,7 +102,7 @@ class _AddDistanceModalBottomSheetState
                             distances.preferredUnit,
                             category,
                             widget._points,
-                            dist);
+                            widget.dist);
                         setState(() {
                           isLoading = true;
                         });
