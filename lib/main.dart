@@ -9,7 +9,7 @@ import 'package:distanceapp/providers/distances.dart';
 import 'package:distanceapp/screens/auth/auth_screen.dart';
 import 'package:distanceapp/screens/distances/distances_screen.dart';
 import 'package:distanceapp/screens/pickers/add_distance_track_screen.dart';
-import 'package:distanceapp/helpers/style.dart';
+import 'package:distanceapp/helpers/config.dart';
 
 void main() {
   runApp(MyApp());
@@ -26,6 +26,12 @@ class MyAppState extends State<MyApp> with ChangeNotifier {
   Map style;
   bool _isLoading = true;
 
+  List<dynamic> primaryDark;
+  List<dynamic> primary;
+  List<dynamic> primaryLight;
+  List<dynamic> accent;
+  List<dynamic> scaffold;
+
   void _switchMode() {
     setState(() {
       _account = !_account;
@@ -35,10 +41,15 @@ class MyAppState extends State<MyApp> with ChangeNotifier {
   @override
   void initState() {
     super.initState();
-    Style().getData().then((value) {
+    Config().getData().then((value) {
       setState(() {
         style = value;
         _isLoading = false;
+        primaryDark = style['appStyle']['colors']['primaryLightRGBO'];
+        primary = style['appStyle']['colors']['primaryRGBO'];
+        primaryLight = style['appStyle']['colors']['primaryLightRGBO'];
+        accent = style['appStyle']['colors']['accentRGBO'];
+        scaffold = style['appStyle']['colors']['scaffoldRGBO'];
       });
       print('then block');
     });
@@ -52,7 +63,6 @@ class MyAppState extends State<MyApp> with ChangeNotifier {
 
   @override
   Widget build(BuildContext context) {
-    print('main build: $style');
     return StreamBuilder(
       stream: FirebaseAuth.instance.onAuthStateChanged,
       builder: (ctx, AsyncSnapshot<FirebaseUser> snapshot) {
@@ -99,50 +109,50 @@ class MyAppState extends State<MyApp> with ChangeNotifier {
               primaryColorLight: style == null
                   ? Colors.lightBlue
                   : Color.fromRGBO(
-                      style['appStyle']['colors']['primaryLightRGBO'][0],
-                      style['appStyle']['colors']['primaryLightRGBO'][1],
-                      style['appStyle']['colors']['primaryLightRGBO'][2],
-                      style['appStyle']['colors']['primaryLightRGBO'][3],
+                      primaryLight[0],
+                      primaryLight[1],
+                      primaryLight[2],
+                      primaryLight[3],
                     ),
               primaryColor: style == null
                   ? Colors.blue
                   : Color.fromRGBO(
-                      style['appStyle']['colors']['primaryRGBO'][0],
-                      style['appStyle']['colors']['primaryRGBO'][1],
-                      style['appStyle']['colors']['primaryRGBO'][2],
-                      style['appStyle']['colors']['primaryRGBO'][3],
+                      primary[0],
+                      primary[1],
+                      primary[2],
+                      primary[3],
                     ),
               primaryColorDark: style == null
                   ? Colors.blue[900]
                   : Color.fromRGBO(
-                      style['appStyle']['colors']['primaryDarkRGBO'][0],
-                      style['appStyle']['colors']['primaryDarkRGBO'][1],
-                      style['appStyle']['colors']['primaryDarkRGBO'][2],
-                      style['appStyle']['colors']['primaryDarkRGBO'][3],
+                      primaryDark[0],
+                      primaryDark[1],
+                      primaryDark[2],
+                      primaryDark[3],
                     ),
               accentColor: style == null
                   ? Colors.yellowAccent
                   : Color.fromRGBO(
-                      style['appStyle']['colors']['accentRGBO'][0],
-                      style['appStyle']['colors']['accentRGBO'][1],
-                      style['appStyle']['colors']['accentRGBO'][2],
-                      style['appStyle']['colors']['accentRGBO'][3],
+                      accent[0],
+                      accent[1],
+                      accent[2],
+                      accent[3],
                     ),
               backgroundColor: style == null
                   ? Colors.white
                   : Color.fromRGBO(
-                      style['appStyle']['colors']['scaffoldRGBO'][0],
-                      style['appStyle']['colors']['scaffoldRGBO'][1],
-                      style['appStyle']['colors']['scaffoldRGBO'][2],
-                      style['appStyle']['colors']['scaffoldRGBO'][3],
+                      scaffold[0],
+                      scaffold[1],
+                      scaffold[2],
+                      scaffold[3],
                     ),
               scaffoldBackgroundColor: style == null
                   ? Colors.white
                   : Color.fromRGBO(
-                      style['appStyle']['colors']['scaffoldRGBO'][0],
-                      style['appStyle']['colors']['scaffoldRGBO'][1],
-                      style['appStyle']['colors']['scaffoldRGBO'][2],
-                      style['appStyle']['colors']['scaffoldRGBO'][3],
+                      scaffold[0],
+                      scaffold[1],
+                      scaffold[2],
+                      scaffold[3],
                     ),
               fontFamily: 'Nunito',
               textTheme: TextTheme(

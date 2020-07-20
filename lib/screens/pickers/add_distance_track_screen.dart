@@ -1,6 +1,5 @@
 import 'dart:ui';
 import 'dart:isolate';
-import 'dart:math';
 
 import 'package:background_locator/location_settings.dart' as ls;
 import 'package:flutter/material.dart';
@@ -11,6 +10,7 @@ import 'package:background_locator/background_locator.dart';
 import 'package:background_locator/location_dto.dart';
 import 'package:provider/provider.dart';
 
+import 'package:distanceapp/helpers/config.dart';
 import 'package:distanceapp/widgets/distances/track_distance_floating_action_button.dart';
 import 'package:distanceapp/widgets/distances/track_distance_bottom_sheet.dart';
 import 'package:distanceapp/providers/distances.dart' as d;
@@ -136,26 +136,6 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
     }
   }
 
-  Marker _buildMarker(Map<String, dynamic> point) {
-    final int calcAlt = (sqrt(max(point['alt'], 0)) * 2.5).round() + 10;
-    return Marker(
-      point: point['LatLng'],
-      width: 9,
-      builder: (ctx) => CircleAvatar(
-        backgroundColor: point['alt'] <= 0
-            ? Color.fromRGBO(0, 255, 0, 1)
-            : point['alt'] > 17000
-                ? Colors.white
-                : Color.fromRGBO(
-                    min((calcAlt).round(), 255),
-                    max((255 - calcAlt).round(),
-                        (-510 + calcAlt * 2.2).round()),
-                    min((calcAlt * 2).round(), 380 - calcAlt),
-                    1),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -207,7 +187,7 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
 //                                return markers;
 //                              }).toList()
                                 markers: _points
-                                    .map((e) => _buildMarker(e))
+                                    .map((e) => Config().buildMarker(e))
                                     .toList(),
                               ),
                             ],

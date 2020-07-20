@@ -8,83 +8,12 @@ import 'package:intl/intl.dart';
 
 import 'package:distanceapp/providers/distances.dart' as d;
 import 'package:distanceapp/main.dart';
+import 'package:distanceapp/helpers/config.dart';
 
 class DistanceDetailsScreen extends StatelessWidget {
   DistanceDetailsScreen(this.dist);
 
   final d.Distance dist;
-
-  Map<String, dynamic> getPathInfo() {
-    LatLng mostLat;
-    LatLng lestLat;
-    LatLng mostLng;
-    LatLng lestLng;
-    double mostAlt;
-    double lestAlt;
-
-    dist.markers.forEach((m) {
-      final ll = m['LatLng'];
-      final a = m['alt'];
-      if (mostLat == null) {
-        mostLat = ll;
-        lestLat = ll;
-        mostLng = ll;
-        lestLng = ll;
-        mostAlt = a;
-        lestAlt = a;
-      } else if (ll.latitude > mostLat.latitude) {
-        mostLat = ll;
-      } else if (ll.latitude < lestLat.latitude) {
-        lestLat = ll;
-      } else if (ll.longitude > mostLng.longitude) {
-        mostLng = ll;
-      } else if (ll.longitude < lestLng.longitude) {
-        lestLng = ll;
-      }
-
-      if (a > mostAlt) {
-        mostAlt = a;
-      } else if (a < lestAlt) {
-        lestAlt = a;
-      }
-    });
-
-    final latDist = Distance().as(LengthUnit.Meter, lestLat, mostLat);
-    final lngDist = Distance().as(LengthUnit.Meter, lestLng, mostLng);
-
-    final zoom = sqrt(max(latDist, lngDist)) * 0.23 - 0.1;
-
-    final center = LatLng(
-        lestLat.latitude + ((mostLat.latitude - lestLat.latitude) / 2),
-        lestLng.longitude + ((mostLng.longitude - lestLng.longitude) / 2));
-
-    return {
-      'zoom': 19 - zoom,
-      'center': center,
-      'minAlt': lestAlt,
-      'maxAlt': mostAlt
-    };
-  }
-
-  Marker _buildMarker(Map<String, dynamic> point) {
-    final int calcAlt = (sqrt(max(point['alt'], 0)) * 2.5).round() + 10;
-    return Marker(
-      point: point['LatLng'],
-      width: 9,
-      builder: (ctx) => CircleAvatar(
-        backgroundColor: point['alt'] <= 0
-            ? Color.fromRGBO(0, 255, 0, 1)
-            : point['alt'] > 17000
-                ? Colors.white
-                : Color.fromRGBO(
-                    min((calcAlt).round(), 255),
-                    max((255 - calcAlt).round(),
-                        (-510 + calcAlt * 2.2).round()),
-                    min((calcAlt * 2).round(), 380 - calcAlt),
-                    1),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +22,8 @@ class DistanceDetailsScreen extends StatelessWidget {
 
     final Duration distTime =
         dist.markers.last['time'].difference(dist.markers.first['time']);
-    final pInfo = getPathInfo();
+    final pInfo = Config().getPathInfo(
+        dist, MediaQuery.of(context).size.height * style['mapHeight']);
     final distances = Provider.of<d.Distances>(context, listen: false);
 
     Widget _buildInfoText(bool isHeading, String text) {
@@ -138,8 +68,9 @@ class DistanceDetailsScreen extends StatelessWidget {
                         subdomains: ['a', 'b', 'c'],
                       ),
                       MarkerLayerOptions(
-                        markers:
-                            dist.markers.map((e) => _buildMarker(e)).toList(),
+                        markers: dist.markers
+                            .map((e) => Config().buildMarker(e))
+                            .toList(),
                       ),
                     ],
                   ),

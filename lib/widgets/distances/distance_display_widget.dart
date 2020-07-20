@@ -9,6 +9,7 @@ import 'package:latlong/latlong.dart';
 import 'package:distanceapp/main.dart';
 import 'package:distanceapp/providers/distances.dart' as d;
 import 'package:distanceapp/screens/distances/distance_details_screen.dart';
+import 'package:distanceapp/helpers/config.dart';
 
 class DistanceDisplayWidget extends StatelessWidget {
   DistanceDisplayWidget(this.distId, key) : super(key: key);
@@ -26,38 +27,7 @@ class DistanceDisplayWidget extends StatelessWidget {
     final dist =
         distances.distances.firstWhere((element) => element.id == distId);
 
-    Map<String, dynamic> getZoomCenter() {
-      LatLng mostLat;
-      LatLng lestLat;
-      LatLng mostLng;
-      LatLng lestLng;
-      dist.markers.forEach((m) {
-        final ll = m['LatLng'];
-        if (mostLat == null) {
-          mostLat = ll;
-          lestLat = ll;
-          mostLng = ll;
-          lestLng = ll;
-        } else if (ll.latitude > mostLat.latitude) {
-          mostLat = ll;
-        } else if (ll.latitude < lestLat.latitude) {
-          lestLat = ll;
-        } else if (ll.longitude > mostLng.longitude) {
-          mostLng = ll;
-        } else if (ll.longitude < lestLng.longitude) {
-          lestLng = ll;
-        }
-      });
-      final latDist = Distance().as(LengthUnit.Meter, lestLat, mostLat);
-      final lngDist = Distance().as(LengthUnit.Meter, lestLng, mostLng);
-      final zoom = sqrt(max(latDist, lngDist)) * 0.23 - 0.1;
-      final center = LatLng(
-          lestLat.latitude + ((mostLat.latitude - lestLat.latitude) / 2),
-          lestLng.longitude + ((mostLng.longitude - lestLng.longitude) / 2));
-      return {'zoom': 19 - zoom, 'center': center};
-    }
-
-    final zoomCenter = getZoomCenter();
+    final zoomCenter = Config().getPathInfo(dist, 250);
 
     _mapController.onReady.then((value) =>
         _mapController.move(zoomCenter['center'], _mapController.zoom));
@@ -100,27 +70,9 @@ class DistanceDisplayWidget extends StatelessWidget {
                         subdomains: ['a', 'b', 'c'],
                       ),
                       MarkerLayerOptions(
-                        markers: dist.markers.map<Marker>((e) {
-                          final int calcAlt =
-                              (sqrt(max(e['alt'] + 1300, 0)) * 1.84).round();
-                          return Marker(
-                            point: e['LatLng'],
-                            width: 9,
-                            builder: (ctx) => CircleAvatar(
-                              backgroundColor: e['alt'] <= 0
-                                  ? Color.fromRGBO(0, 255, 0, 1)
-                                  : e['alt'] > 30000
-                                      ? Colors.white
-                                      : Color.fromRGBO(
-                                          min((calcAlt).round(), 255),
-                                          max((255 - calcAlt).round(),
-                                              -510 + calcAlt * 2),
-                                          min((calcAlt * 2).round(),
-                                              380 - calcAlt),
-                                          1),
-                            ),
-                          );
-                        }).toList(),
+                        markers: dist.markers
+                            .map<Marker>((e) => Config().buildMarker(e))
+                            .toList(),
                       ),
                     ],
                   ),
@@ -142,8 +94,6 @@ class DistanceDisplayWidget extends StatelessWidget {
               title: Center(
                 child: Consumer<d.Distances>(
                   builder: (ctx, dists, _) {
-                    print(
-                        'from distance display widget: ${dists.preferredUnit}');
                     return Text(
                       '${(dists.computeTotalDist(dist.markers) / (dists.preferredUnit == 'Miles' ? 1609.344 : 1000)).toStringAsFixed(style['distanceAccuracy'])} ${dists.preferredUnit}',
                     );

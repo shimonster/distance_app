@@ -97,19 +97,6 @@ class _DistanceDrawerState extends State<DistanceDrawer> {
               ),
             ),
             Divider(),
-//            FutureBuilder(
-//              future: !_isInit
-//                  ? Future(() async {
-//                      await cats.getCategories();
-//                      _isInit = true;
-//                    })
-//                  : null,
-//              builder: (ctx, snapshot) => snapshot.connectionState ==
-//                          ConnectionState.waiting &&
-//                      snapshot.connectionState != ConnectionState.none
-//                  ? Center(
-//                      child: CircularProgressIndicator(),
-//                    )
             Expanded(
               child: ListView.builder(
                 itemCount: cats.categories.length + 1,
@@ -219,7 +206,6 @@ class _DistanceDrawerState extends State<DistanceDrawer> {
                           ),
               ),
             ),
-//            ),
           ],
         ),
       ),

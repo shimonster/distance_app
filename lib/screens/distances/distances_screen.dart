@@ -25,7 +25,7 @@ class _DistancesScreenState extends State<DistancesScreen>
   var _hasDisposed = false;
   AnimationController _animationController;
   Animation _offsetAnimation;
-  bool _isInit = false;
+  bool shouldAnimate = true;
 
   @override
   void initState() {
@@ -66,18 +66,18 @@ class _DistancesScreenState extends State<DistancesScreen>
     final mainStyle = Provider.of<MyAppState>(context, listen: false).style;
     final style = mainStyle['appStyle']['distancesScreen'];
 
-    if (_animationController != null) _animationController.reset();
     final distances = Provider.of<Distances>(context, listen: false);
     final List<Distance> distanceCats = distances.distances
         .where((element) => element.cat == _category)
         .toList();
 
     void _selectCategory(String cat) {
+      shouldAnimate = true;
       setState(() {
         Navigator.of(context).pop();
         _category = cat;
       });
-      _animationController.forward();
+//      if (_animationController != null) _animationController.reset();
     }
 
     final offsetStart = ((Provider.of<Distances>(context, listen: false)
@@ -136,7 +136,10 @@ class _DistancesScreenState extends State<DistancesScreen>
               ),
               padding: EdgeInsets.all(style['spacing']),
               itemBuilder: (ctx, i) {
-                _animationController.forward();
+                if (shouldAnimate)
+                  _animationController
+                      .forward()
+                      .then((value) => shouldAnimate = false);
                 if (i !=
                     (_category == 'All'
                         ? distances.distances.length
