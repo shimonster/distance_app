@@ -33,7 +33,7 @@ appStyle:
         font: 17.0
         mapHeight: 0.33
         nameRight: 0.0
-        nameBottom: 20.0
+        nameBottom: 0.05
         nameWidth: 0.75
         namePadding: 20.0
         nameFont: 22.0
@@ -43,8 +43,8 @@ appStyle:
         aspectRatio: 1.2 # width to height
         maxCrossAxisExtent: 300.0
         spacing: 10.0
-        multiplyOffsetDuration: 200
-        addOffsetDuration: 100
+        multiplyOffsetDuration: 100
+        addOffsetDuration: 200
         appBarAddIconSize: 30.0
     authCard:
         width: 0.75
@@ -64,9 +64,13 @@ appStyle:
         nameContainerOpacity: 0.8
         distanceContainerOpacity: 0.54
     trackDistanceBottomSheet:
-        height: 70
-        font: 17
-        horizontalButtonPadding: 15
+        height: 70.0
+        font: 17.0
+        horizontalButtonPadding: 15.0
+    trackDistanceModalBottomSheet:
+        padding: 10.0
+        maxHeight: 0.5
+        dropDownButtonHeight: 55.0
 appFunctionality:
     addTrackScreen:
         distanceFilter: 10.0

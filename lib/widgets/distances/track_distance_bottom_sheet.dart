@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:distanceapp/providers/distances.dart';
-import 'package:distanceapp/widget/distances/track_distance_modal_bottom_sheet.dart'
+import 'package:distanceapp/widgets/distances/track_distance_modal_bottom_sheet.dart';
 import 'package:distanceapp/main.dart';
 
 class TrackDistanceBottomSheet extends StatefulWidget {

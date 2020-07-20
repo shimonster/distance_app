@@ -90,6 +90,7 @@ class DistanceDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final mainStyle = Provider.of<MyAppState>(context, listen: false).style;
     final style = mainStyle['appStyle']['distanceDetailsScreen'];
+
     final Duration distTime =
         dist.markers.last['time'].difference(dist.markers.first['time']);
     final pInfo = getPathInfo();
@@ -145,7 +146,8 @@ class DistanceDetailsScreen extends StatelessWidget {
                 ),
                 Positioned(
                   right: style['nameRight'],
-                  bottom: style['nameBotton'],
+                  bottom:
+                      MediaQuery.of(context).size.height * style['nameBottom'],
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.horizontal(

@@ -3,7 +3,7 @@ import 'package:yaml/yaml.dart';
 
 class Style {
   Future<Map> getData() async {
-    final stringData = await rootBundle.loadString('assets/style/style.yaml');
+    final stringData = await rootBundle.loadString('assets/style/config.yaml');
     final YamlMap yamlData = loadYaml(stringData);
     print(yamlData);
     final map = {};

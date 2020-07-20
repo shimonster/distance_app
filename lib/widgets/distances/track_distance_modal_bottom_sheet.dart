@@ -5,19 +5,19 @@ import 'package:distanceapp/providers/distances.dart';
 import 'package:distanceapp/providers/categories.dart';
 import 'package:distanceapp/main.dart';
 
-class AddDistanceModalBottomSheet extends StatefulWidget {
-  AddDistanceModalBottomSheet(this._points, this.dist);
+class TrackDistanceModalBottomSheet extends StatefulWidget {
+  TrackDistanceModalBottomSheet(this._points, this.dist);
 
   final List<Map<String, dynamic>> _points;
-  final Distance dist;
+  final double dist;
 
   @override
-  _AddDistanceModalBottomSheetState createState() =>
-      _AddDistanceModalBottomSheetState();
+  _TrackDistanceModalBottomSheetState createState() =>
+      _TrackDistanceModalBottomSheetState();
 }
 
-class _AddDistanceModalBottomSheetState
-    extends State<AddDistanceModalBottomSheet> {
+class _TrackDistanceModalBottomSheetState
+    extends State<TrackDistanceModalBottomSheet> {
   bool isLoading = false;
   String category;
   final name = TextEditingController();
@@ -26,15 +26,15 @@ class _AddDistanceModalBottomSheetState
   @override
   Widget build(BuildContext context) {
     final mainStyle = Provider.of<MyAppState>(context, listen: false).style;
-    final style = mainStyle['appStyle']['distanceDisplayWidget'];
+    final style = mainStyle['appStyle']['trackDistanceModalBottomSheet'];
 
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
-      padding: EdgeInsets.all(10),
+      padding: EdgeInsets.all(style['padding']),
       child: SingleChildScrollView(
         child: Container(
           constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.5,
+            maxHeight: MediaQuery.of(context).size.height * style['maxHeight'],
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -54,7 +54,7 @@ class _AddDistanceModalBottomSheetState
                 height: 10,
               ),
               Container(
-                height: 55,
+                height: style['dropDownButtonHeight'],
                 child: DropdownButton<String>(
                   value: category,
                   onTap: () {
