@@ -2,8 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../providers/distances.dart';
-import '../../providers/categories.dart';
+import 'package:distanceapp/providers/distances.dart';
+import 'package:distanceapp/providers/categories.dart';
+import 'package:distanceapp/main.dart';
 
 class TrackDistanceBottomSheet extends StatefulWidget {
   const TrackDistanceBottomSheet({
@@ -20,9 +21,6 @@ class TrackDistanceBottomSheet extends StatefulWidget {
 }
 
 class _TrackDistanceBottomSheetState extends State<TrackDistanceBottomSheet> {
-  String category;
-  final name = TextEditingController();
-  final nameFocus = FocusNode();
   double dist;
 
   @override
@@ -33,104 +31,13 @@ class _TrackDistanceBottomSheetState extends State<TrackDistanceBottomSheet> {
   }
 
   Widget _buildModalContent() {
+    final mainStyle = Provider.of<MyAppState>(context, listen: false).style;
+    final style = mainStyle['appStyle']['distanceDisplayWidget'];
+
     bool isLoading = false;
     return StatefulBuilder(
       builder: (ctx, setModalState) {
-        return Container(
-          color: Theme.of(context).scaffoldBackgroundColor,
-          padding: EdgeInsets.all(10),
-          child: SingleChildScrollView(
-            child: Container(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(ctx).size.height * 0.5,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  TextField(
-                    controller: name,
-                    focusNode: nameFocus,
-                    decoration: InputDecoration(
-                      labelText: 'Name',
-                    ),
-                    onTap: () {
-                      FocusScope.of(ctx).requestFocus(nameFocus);
-                    },
-                    textAlignVertical: TextAlignVertical.center,
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Container(
-                    height: 55,
-                    child: DropdownButton<String>(
-                      value: category,
-                      onTap: () {
-                        nameFocus.unfocus();
-                      },
-                      hint: Text('Category'),
-                      underline: Container(
-                        width: double.infinity,
-                        height: 1,
-                        color: Colors.grey,
-                      ),
-                      onChanged: (String cat) {
-                        setModalState(() {
-                          category = cat;
-                        });
-                      },
-                      isExpanded: true,
-                      items: Provider.of<Categories>(ctx, listen: false)
-                          .categories
-                          .map(
-                            (e) => DropdownMenuItem<String>(
-                              child: Text(e),
-                              value: e,
-                            ),
-                          )
-                          .toList(),
-                    ),
-                  ),
-                  isLoading
-                      ? Center(
-                          child: CircularProgressIndicator(),
-                        )
-                      : RaisedButton(
-                          child: Text('Finish'),
-                          onPressed: () async {
-                            setModalState(() {
-                              isLoading = true;
-                            });
-                            final distances =
-                                Provider.of<Distances>(ctx, listen: false);
-                            print('start adding');
-                            await distances.addDistance(
-                                name.text,
-                                widget._points.first['time'],
-                                distances.preferredUnit,
-                                category,
-                                widget._points,
-                                dist);
-                            setModalState(() {
-                              isLoading = true;
-                            });
-                            name.text = '';
-                            Navigator.of(ctx).pop();
-                            if (Navigator.of(ctx).canPop()) {
-                              Navigator.of(ctx).pop();
-                            }
-                          },
-                        ),
-                  if (MediaQuery.of(ctx).viewInsets.bottom > 0 &&
-                      nameFocus.hasFocus)
-                    Expanded(
-                      child: Container(),
-                    ),
-                ],
-              ),
-            ),
-          ),
-        );
+        return
       },
     );
   }
@@ -144,13 +51,16 @@ class _TrackDistanceBottomSheetState extends State<TrackDistanceBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final mainStyle = Provider.of<MyAppState>(context, listen: false).style;
+    final style = mainStyle['appStyle']['trackDistanceBottomSheet'];
+
     final distances = Provider.of<Distances>(context, listen: false);
     dist = distances.computeTotalDist(widget._points) /
         (distances.preferredUnit == 'Miles' ? 1609.344 : 1000);
 
     return Container(
       width: double.infinity,
-      height: 70,
+      height: style['height'],
       color: Theme.of(context).primaryColorLight,
       child: Row(
         children: <Widget>[
@@ -160,17 +70,17 @@ class _TrackDistanceBottomSheetState extends State<TrackDistanceBottomSheet> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   Text(
-                    'Current Distance: ${dist.toStringAsFixed(3)} ${distances.preferredUnit}',
+                    'Current Distance: ${dist.toStringAsFixed(mainStyle['appStyle']['distanceDisplayWidget']['distanceAccuracy'])} ${distances.preferredUnit}',
                     style: TextStyle(
                       color: Theme.of(context).primaryColorDark,
-                      fontSize: 17,
+                      fontSize: style['font'],
                     ),
                   ),
                   Text(
                     'Points: ${widget._points.length}',
                     style: TextStyle(
                       color: Theme.of(context).primaryColorDark,
-                      fontSize: 17,
+                      fontSize: style['font'],
                     ),
                   ),
                 ],
@@ -178,7 +88,7 @@ class _TrackDistanceBottomSheetState extends State<TrackDistanceBottomSheet> {
             ),
           ),
           Padding(
-            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 15),
+            padding: EdgeInsets.symmetric(horizontal: 15),
             child: RaisedButton.icon(
               onPressed: () {
                 _submitDistance();

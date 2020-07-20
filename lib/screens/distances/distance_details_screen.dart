@@ -6,7 +6,8 @@ import 'package:latlong/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
-import '../../providers/distances.dart' as d;
+import 'package:distanceapp/providers/distances.dart' as d;
+import 'package:distanceapp/main.dart';
 
 class DistanceDetailsScreen extends StatelessWidget {
   DistanceDetailsScreen(this.dist);
@@ -66,44 +67,50 @@ class DistanceDetailsScreen extends StatelessWidget {
   }
 
   Marker _buildMarker(Map<String, dynamic> point) {
-    final int calcAlt = (sqrt(max(point['alt'] + 1300, 0)) * 1.84).round();
+    final int calcAlt = (sqrt(max(point['alt'], 0)) * 2.5).round() + 10;
     return Marker(
       point: point['LatLng'],
       width: 9,
       builder: (ctx) => CircleAvatar(
         backgroundColor: point['alt'] <= 0
             ? Color.fromRGBO(0, 255, 0, 1)
-            : point['alt'] > 30000
+            : point['alt'] > 17000
                 ? Colors.white
                 : Color.fromRGBO(
                     min((calcAlt).round(), 255),
-                    max((255 - calcAlt).round(), -510 + calcAlt * 2),
+                    max((255 - calcAlt).round(),
+                        (-510 + calcAlt * 2.2).round()),
                     min((calcAlt * 2).round(), 380 - calcAlt),
                     1),
       ),
     );
   }
 
-  Widget _buildInfoText(bool isHeading, String text) {
-    return Padding(
-      padding: EdgeInsets.only(left: isHeading ? 15 : 40, top: 10),
-      child: Text(
-        text,
-        style: style.copyWith(fontWeight: isHeading ? FontWeight.bold : null),
-      ),
-    );
-  }
-
-  final style = TextStyle(
-    fontSize: 17,
-  );
-
   @override
   Widget build(BuildContext context) {
+    final mainStyle = Provider.of<MyAppState>(context, listen: false).style;
+    final style = mainStyle['appStyle']['distanceDetailsScreen'];
     final Duration distTime =
         dist.markers.last['time'].difference(dist.markers.first['time']);
     final pInfo = getPathInfo();
     final distances = Provider.of<d.Distances>(context, listen: false);
+
+    Widget _buildInfoText(bool isHeading, String text) {
+      return Padding(
+        padding: EdgeInsets.only(
+            left: isHeading
+                ? style['headingLeftPadding']
+                : style['normalLeftPadding'],
+            top: style['topPadding']),
+        child: Text(
+          text,
+          style: TextStyle(
+              fontWeight: isHeading ? FontWeight.bold : null,
+              fontSize: style['font']),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(dist.name),
@@ -112,7 +119,7 @@ class DistanceDetailsScreen extends StatelessWidget {
         children: <Widget>[
           Container(
             width: double.infinity,
-            height: MediaQuery.of(context).size.height * 1 / 3,
+            height: MediaQuery.of(context).size.height * style['mapHeight'],
             child: Stack(
               children: <Widget>[
                 Hero(
@@ -137,15 +144,22 @@ class DistanceDetailsScreen extends StatelessWidget {
                   ),
                 ),
                 Positioned(
-                  right: 0,
-                  bottom: 20,
+                  right: style['nameRight'],
+                  bottom: style['nameBotton'],
                   child: Container(
-                    width: MediaQuery.of(context).size.width * 3 / 4,
-                    padding: EdgeInsets.all(20),
-                    color: Colors.black54,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.horizontal(
+                        left: Radius.circular(style['nameBorderRadius']),
+                      ),
+                      color: Colors.black54,
+                    ),
+                    width:
+                        MediaQuery.of(context).size.width * style['nameWidth'],
+                    padding: EdgeInsets.all(style['namePadding']),
                     child: Text(
                       dist.name,
-                      style: TextStyle(fontSize: 22, color: Colors.white),
+                      style: TextStyle(
+                          fontSize: style['nameFont'], color: Colors.white),
                     ),
                   ),
                 ),
@@ -157,8 +171,12 @@ class DistanceDetailsScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Theme.of(context).primaryColor.withOpacity(0.5),
-                    Theme.of(context).accentColor.withOpacity(0.5),
+                    Theme.of(context)
+                        .primaryColor
+                        .withOpacity(style['primaryOpacity']),
+                    Theme.of(context)
+                        .accentColor
+                        .withOpacity(style['accentOpacity']),
                   ],
                   end: Alignment.bottomRight,
                   begin: Alignment.topLeft,
@@ -178,17 +196,17 @@ class DistanceDetailsScreen extends StatelessWidget {
                     _buildInfoText(false,
                         'End: ${DateFormat('jms').format(dist.markers.last['time'])}'),
                     _buildInfoText(false,
-                        'Average Speed: ${((distances.computeTotalDist(dist.markers) / (distances.preferredUnit == 'Miles' ? 1609.344 : 1000)) / (distTime.inSeconds / 3600)).toStringAsFixed(2)}  ${distances.preferredUnit == 'Miles' ? 'mph' : 'kph'}'),
+                        'Average Speed: ${((distances.computeTotalDist(dist.markers) / (distances.preferredUnit == 'Miles' ? 1609.344 : 1000)) / (distTime.inSeconds / 3600)).toStringAsFixed(style['speedAccuracy'])}  ${distances.preferredUnit == 'Miles' ? 'mph' : 'kph'}'),
                     Divider(),
                     _buildInfoText(true, 'Path Info'),
                     _buildInfoText(false,
-                        'Distance: ${(distances.computeTotalDist(dist.markers) / (distances.preferredUnit == 'Miles' ? 1609.344 : 1000)).toStringAsFixed(2)} ${distances.preferredUnit == 'Miles' ? 'Miles' : 'Kilometers'}'),
+                        'Distance: ${(distances.computeTotalDist(dist.markers) / (distances.preferredUnit == 'Miles' ? 1609.344 : 1000)).toStringAsFixed(mainStyle['appStyle']['distanceDisplayWidget']['distanceAccuracy'])} ${distances.preferredUnit == 'Miles' ? 'Miles' : 'Kilometers'}'),
                     _buildInfoText(false,
-                        'Lowest Altitude: ${pInfo['minAlt'].toStringAsFixed(2)}'),
+                        'Lowest Altitude: ${pInfo['minAlt'].toStringAsFixed(style['altitudeAccuracy'])}'),
                     _buildInfoText(false,
-                        'Highest Altitude: ${pInfo['minAlt'].toStringAsFixed(2)}'),
+                        'Highest Altitude: ${pInfo['minAlt'].toStringAsFixed(style['altitudeAccuracy'])}'),
                     _buildInfoText(false,
-                        'Change in Altitude: ${(pInfo['minAlt'] - pInfo['minAlt']).toStringAsFixed(2)}'),
+                        'Change in Altitude: ${(pInfo['minAlt'] - pInfo['minAlt']).toStringAsFixed(style['altitudeAccuracy'])}'),
                   ],
                 ),
               ),

@@ -9,7 +9,7 @@ import 'package:maps_toolkit/maps_toolkit.dart' as mt;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity/connectivity.dart';
 
-import '../helpers/sql_helper.dart';
+import 'package:distanceapp/helpers/sql_helper.dart';
 
 class Distance {
   const Distance({

@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:connectivity/connectivity.dart';
 
-import '../helpers/sql_helper.dart';
+import 'package:distanceapp/helpers/sql_helper.dart';
 
 class Categories extends ChangeNotifier {
   Categories(this.uid);

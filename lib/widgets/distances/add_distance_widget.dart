@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../../screens/pickers/add_distance_track_screen.dart';
+import 'package:distanceapp/screens/pickers/add_distance_track_screen.dart';
 
 class AddDistanceWidget extends StatelessWidget {
   AddDistanceWidget(this.rebuild);

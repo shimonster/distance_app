@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../../widgets/auth/auth_card.dart';
+import 'package:distanceapp/widgets/auth/auth_card.dart';
+import 'package:distanceapp/main.dart';
 
 class AuthScreen extends StatelessWidget {
   AuthScreen(this.switchMode);
@@ -8,13 +10,15 @@ class AuthScreen extends StatelessWidget {
   final void Function() switchMode;
   @override
   Widget build(BuildContext context) {
+    final mainStyle = Provider.of<MyAppState>(context, listen: false).style;
+    final style = mainStyle['appStyle']['authScreen'];
     return Scaffold(
       body: Stack(
         children: [
           Container(
             height: double.infinity,
             child: Image.asset(
-              'assets/images/distance.jpg',
+              style['imageURL'],
               fit: BoxFit.cover,
             ),
           ),
@@ -22,8 +26,12 @@ class AuthScreen extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Theme.of(context).accentColor.withOpacity(0.9),
-                  Theme.of(context).primaryColor.withOpacity(0.75),
+                  Theme.of(context)
+                      .accentColor
+                      .withOpacity(style['accentOpacity']),
+                  Theme.of(context)
+                      .primaryColor
+                      .withOpacity(style['primaryOpacity']),
                 ],
                 begin: Alignment.bottomRight,
                 end: Alignment.topLeft,

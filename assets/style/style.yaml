@@ -1,47 +1,74 @@
 appStyle:
+    general:
+        buttonRadius: 10.0
     colors:
         primaryLightRGBO:
-            [187, 230, 228, 1]
+            [187, 230, 228, 1.0]
         primaryRGBO:
 #            [0, 0, 0, 1]
-            [66, 191, 221, 1]
+            [66, 191, 221, 1.0]
         primaryDarkRGBO:
-            [8, 75, 131, 1]
+            [8, 75, 131, 1.0]
         accentRGBO:
-            [252, 163, 17, 1]
+            [252, 163, 17, 1.0]
         scaffoldRGBO:
-            [255, 232, 189, 1]
+            [255, 232, 189, 1.0]
         appBarContentRGBO:
-            [255, 255, 255, 1]
+            [255, 255, 255, 1.0]
         buttonTextRBGO:
-            [255, 255, 255, 1]
+            [255, 255, 255, 1.0]
         bottonColorRGBO:
-            [8, 75, 131, 1]
-    distanceDisplayWidget:
-          topRightRadius: 13
-          topLeftRadius: 2
-          bottomLeftRadius: 13
-          bottomRightRadius: 2
-          elevation: 10
-          distanceAccuracy: 2
-    distancesScreen:
-        aspectRatio: 6 / 5 # width to height
-        maxCrossAxisExtent: 300
-    authCard:
-        maxHeightRatio: 0.75
-        widthRatio: 0.75
-        padding: 10
-    addTrackScreen:
-        initialZoom: 18
-        maxZoom: 19
+            [8, 75, 131, 1.0]
+    authScreen:
+        imageURL: 'assets/images/distance.jpg'
+        accentOpacity: 0.9
+        primaryOpacity: 0.75
     distanceDetailsScreen:
-        namePadding: 20
-        nameBorderRadius: 10
-        nameFontSize: 22
-        distanceAccuracy: 2
+        nameBorderRadius: 10.0
         speedAccuracy: 2
         altitudeAccuracy: 2
+        headingLeftPadding: 15.0
+        normalLeftPadding: 40.0
+        topPadding: 10.0
+        font: 17.0
+        mapHeight: 0.33
+        nameRight: 0.0
+        nameBottom: 20.0
+        nameWidth: 0.75
+        namePadding: 20.0
+        nameFont: 22.0
+        primaryOpacity: 0.5
+        accentOpacity: 0.5
+    distancesScreen:
+        aspectRatio: 1.2 # width to height
+        maxCrossAxisExtent: 300.0
+        spacing: 10.0
+        multiplyOffsetDuration: 200
+        addOffsetDuration: 100
+        appBarAddIconSize: 30.0
+    authCard:
+        width: 0.75
+        maxHeight: 0.75
+        padding: 10.0
+        googleImage: 'assets/images/1342004.png'
+    distancesDrawer:
+        buttonPadding: 8.0
+        buttonBorderWidth: 2.0
+        nameInputHeight: 40.0
+        inputHorizontalPadding: 10.0
+    distanceDisplayWidget:
+        radius: 13.0
+        elevation: 10.0
+        distanceAccuracy: 2
+        namePadding: 10.0
+        nameContainerOpacity: 0.8
+        distanceContainerOpacity: 0.54
+    trackDistanceBottomSheet:
+        height: 70
+        font: 17
+        horizontalButtonPadding: 15
 appFunctionality:
     addTrackScreen:
         distanceFilter: 10.0
         interval: 5
+        initialZoom: 18.0

@@ -5,8 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-import '../../providers/categories.dart';
-import '../../providers/distances.dart';
+import 'package:distanceapp/providers/categories.dart';
+import 'package:distanceapp/main.dart';
 
 class AuthCard extends StatefulWidget {
   AuthCard(this.switchMode);
@@ -74,14 +74,16 @@ class _AuthCardState extends State<AuthCard> {
 
   @override
   Widget build(BuildContext context) {
+    final mainStyle = Provider.of<MyAppState>(context, listen: false).style;
+    final style = mainStyle['appStyle']['authCard'];
     return Container(
-      width: MediaQuery.of(context).size.width * 3 / 4,
+      width: MediaQuery.of(context).size.width * style['width'],
       constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 3 / 4,
+        maxHeight: MediaQuery.of(context).size.height * style['maxHeight'],
       ),
       child: Card(
         child: Padding(
-          padding: EdgeInsets.all(10),
+          padding: EdgeInsets.all(style['padding']),
           child: Form(
             key: _form,
             child: SingleChildScrollView(
@@ -148,7 +150,7 @@ class _AuthCardState extends State<AuthCard> {
                       child: OutlineButton.icon(
                         borderSide: BorderSide(color: Colors.black87),
                         icon: Image.asset(
-                          'assets/images/1342004.png',
+                          style['googleImage'],
                           fit: BoxFit.fitHeight,
                         ),
                         label: Text('Sign in with google'),
@@ -194,7 +196,11 @@ class _AuthCardState extends State<AuthCard> {
                               builder: (ctx) => AlertDialog(
                                 title: Text('Are you sure?'),
                                 content: Text(
-                                    'If you continue without an account, the measurements you take will be saved to your device. Create and acount if you would like to back them up'),
+                                    'If you continue without an account, your '
+                                    'distances will be saved to your devices '
+                                    'hard-drive and won\'t be backed up. If '
+                                    'something happens to your device, your '
+                                    'distances will be lost.'),
                                 actions: <Widget>[
                                   FlatButton(
                                     child: Text('OK'),

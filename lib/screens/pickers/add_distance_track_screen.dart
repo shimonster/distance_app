@@ -11,9 +11,10 @@ import 'package:background_locator/background_locator.dart';
 import 'package:background_locator/location_dto.dart';
 import 'package:provider/provider.dart';
 
-import '../../widgets/distances/track_distance_floating_action_button.dart';
-import '../../widgets/distances/track_distance_bottom_sheet.dart';
-import '../../providers/distances.dart' as d;
+import 'package:distanceapp/widgets/distances/track_distance_floating_action_button.dart';
+import 'package:distanceapp/widgets/distances/track_distance_bottom_sheet.dart';
+import 'package:distanceapp/providers/distances.dart' as d;
+import 'package:distanceapp/main.dart';
 
 class AddDistanceTrackScreen extends StatefulWidget {
   static const routeName = '/add_distance_track_screen';
@@ -24,6 +25,10 @@ class AddDistanceTrackScreen extends StatefulWidget {
 
 class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
     with WidgetsBindingObserver {
+  Map<dynamic, dynamic> mainStyle;
+  Map<dynamic, dynamic> style;
+  Map<dynamic, dynamic> function;
+
   List<Map<String, dynamic>> _points = [];
   bool _isAtLastPoint = true;
   bool _isLoading = false;
@@ -34,9 +39,6 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
   Stream _locationStream;
 
   static const _isolateName = 'LocationIsolate';
-  static const _distanceFilter = 10.0;
-  static const _interval = 1;
-  static const _initialZoom = 18.0;
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -63,18 +65,13 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
   @override
   void initState() {
     super.initState();
-//    Location().getLocation().then(
-//          (value) => _addPoint(
-//            {
-//              'LatLng': LatLng(value.latitude, value.longitude),
-//              'alt': value.altitude //event.altitude
-//            },
-//          ),
-//        );
+    mainStyle = Provider.of<MyAppState>(context, listen: false).style;
+    style = mainStyle['appStyle']['distanceDetailsScreen'];
+    function = mainStyle['appFunctionality']['addTrackScreen'];
     Location().requestPermission();
     Location().changeSettings(
-        interval: _interval * 1000,
-        distanceFilter: _points.isEmpty ? 0 : _distanceFilter,
+        interval: function['interval'] * 1000,
+        distanceFilter: _points.isEmpty ? 0 : function['distanceFilter'],
         accuracy: LocationAccuracy.high);
     _mapController.onReady.then((value) =>
         _isAtLastPoint = _mapController.center == _points.last['LatLng']);
@@ -85,7 +82,7 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
             : _addPoint(
                 {
                   'LatLng': LatLng(event.latitude, event.longitude),
-                  'alt': event.altitude //event.altitude
+                  'alt': event.altitude
                 },
               ),
       );
@@ -109,8 +106,8 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
     BackgroundLocator.registerLocationUpdate(
       backgroundLocationCallback,
       settings: ls.LocationSettings(
-        distanceFilter: _distanceFilter,
-        interval: _interval,
+        distanceFilter: function['distanceFilter'],
+        interval: function['interval'],
       ),
     );
   }
@@ -122,8 +119,7 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
     };
     if (_points.isNotEmpty) {
       final dist = d.Distances('').computeTotalDist([addMap, _points.last]);
-      if (dist > _distanceFilter) {
-        print('dist: $dist');
+      if (dist > function['distanceFilter']) {
         setState(() {
           _points.add(addMap);
         });
@@ -141,7 +137,7 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
   }
 
   Marker _buildMarker(Map<String, dynamic> point) {
-    final int calcAlt = (sqrt(max(point['alt'] + 1200, 0)) * 2).round();
+    final int calcAlt = (sqrt(max(point['alt'], 0)) * 2.5).round() + 10;
     return Marker(
       point: point['LatLng'],
       width: 9,
@@ -152,7 +148,8 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
                 ? Colors.white
                 : Color.fromRGBO(
                     min((calcAlt).round(), 255),
-                    max((255 - calcAlt).round(), -510 + calcAlt * 2),
+                    max((255 - calcAlt).round(),
+                        (-510 + calcAlt * 2.2).round()),
                     min((calcAlt * 2).round(), 380 - calcAlt),
                     1),
       ),
@@ -180,8 +177,8 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
                             mapController: _mapController,
                             options: MapOptions(
                               maxZoom: 19,
-                              center: LatLng(0, 0), //_points.last['LatLng'],
-                              zoom: _initialZoom,
+                              center: _points.last['LatLng'],
+                              zoom: function['initialZoom'],
                               onPositionChanged: (pos, _) {
                                 if (_points.isNotEmpty) {
                                   if (pos.center != _points.last['LatLng']) {
@@ -197,22 +194,22 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
                                 subdomains: ['a', 'b', 'c'],
                               ),
                               MarkerLayerOptions(
-                                  markers: _points.expand((element) {
-                                final List<Marker> markers = [];
-                                for (var i = 0; i < 5000; i++) {
-                                  markers.add(
-                                    _buildMarker({
-                                      'LatLng': LatLng(i / 1000, 0),
-                                      'alt': (i - 150) * 10
-                                    }),
-                                  );
-                                }
-                                return markers;
-                              }).toList()
-//                                markers: _points
-//                                    .map((e) => _buildMarker(e))
-//                                    .toList(),
-                                  ),
+//                                  markers: _points.expand((element) {
+//                                final List<Marker> markers = [];
+//                                for (var i = 0; i < 5000; i++) {
+//                                  markers.add(
+//                                    _buildMarker({
+//                                      'LatLng': LatLng(i / 1000, 0),
+//                                      'alt': (i - 150) * 10
+//                                    }),
+//                                  );
+//                                }
+//                                return markers;
+//                              }).toList()
+                                markers: _points
+                                    .map((e) => _buildMarker(e))
+                                    .toList(),
+                              ),
                             ],
                           ),
                   ),

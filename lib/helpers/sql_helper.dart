@@ -1,12 +1,9 @@
-import 'dart:math';
-
 import 'package:flutter/cupertino.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:latlong/latlong.dart' as ll;
-import 'package:provider/provider.dart';
 
-import '../providers/distances.dart';
+import 'package:distanceapp/providers/distances.dart';
 
 class SQLHelper {
   static Future<Database> distanceDbSetup(String uid) async {

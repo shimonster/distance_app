@@ -3,14 +3,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:yaml/yaml.dart';
 
-import './providers/categories.dart';
-import './providers/distances.dart';
-import './screens/auth/auth_screen.dart';
-import './screens/distances/distances_screen.dart';
-import './screens/pickers/add_distance_track_screen.dart';
-import 'helpers/style.dart';
+import 'package:distanceapp/providers/categories.dart';
+import 'package:distanceapp/providers/distances.dart';
+import 'package:distanceapp/screens/auth/auth_screen.dart';
+import 'package:distanceapp/screens/distances/distances_screen.dart';
+import 'package:distanceapp/screens/pickers/add_distance_track_screen.dart';
+import 'package:distanceapp/helpers/style.dart';
 
 void main() {
   runApp(MyApp());
@@ -25,6 +24,7 @@ class MyAppState extends State<MyApp> with ChangeNotifier {
   var _account = true;
   StreamSubscription _listener;
   Map style;
+  bool _isLoading = true;
 
   void _switchMode() {
     setState(() {
@@ -38,6 +38,7 @@ class MyAppState extends State<MyApp> with ChangeNotifier {
     Style().getData().then((value) {
       setState(() {
         style = value;
+        _isLoading = false;
       });
       print('then block');
     });
@@ -101,8 +102,7 @@ class MyAppState extends State<MyApp> with ChangeNotifier {
                       style['appStyle']['colors']['primaryLightRGBO'][0],
                       style['appStyle']['colors']['primaryLightRGBO'][1],
                       style['appStyle']['colors']['primaryLightRGBO'][2],
-                      style['appStyle']['colors']['primaryLightRGBO'][3]
-                          .toDouble(),
+                      style['appStyle']['colors']['primaryLightRGBO'][3],
                     ),
               primaryColor: style == null
                   ? Colors.blue
@@ -110,7 +110,7 @@ class MyAppState extends State<MyApp> with ChangeNotifier {
                       style['appStyle']['colors']['primaryRGBO'][0],
                       style['appStyle']['colors']['primaryRGBO'][1],
                       style['appStyle']['colors']['primaryRGBO'][2],
-                      style['appStyle']['colors']['primaryRGBO'][3].toDouble(),
+                      style['appStyle']['colors']['primaryRGBO'][3],
                     ),
               primaryColorDark: style == null
                   ? Colors.blue[900]
@@ -118,8 +118,7 @@ class MyAppState extends State<MyApp> with ChangeNotifier {
                       style['appStyle']['colors']['primaryDarkRGBO'][0],
                       style['appStyle']['colors']['primaryDarkRGBO'][1],
                       style['appStyle']['colors']['primaryDarkRGBO'][2],
-                      style['appStyle']['colors']['primaryDarkRGBO'][3]
-                          .toDouble(),
+                      style['appStyle']['colors']['primaryDarkRGBO'][3],
                     ),
               accentColor: style == null
                   ? Colors.yellowAccent
@@ -127,7 +126,7 @@ class MyAppState extends State<MyApp> with ChangeNotifier {
                       style['appStyle']['colors']['accentRGBO'][0],
                       style['appStyle']['colors']['accentRGBO'][1],
                       style['appStyle']['colors']['accentRGBO'][2],
-                      style['appStyle']['colors']['accentRGBO'][3].toDouble(),
+                      style['appStyle']['colors']['accentRGBO'][3],
                     ),
               backgroundColor: style == null
                   ? Colors.white
@@ -135,7 +134,7 @@ class MyAppState extends State<MyApp> with ChangeNotifier {
                       style['appStyle']['colors']['scaffoldRGBO'][0],
                       style['appStyle']['colors']['scaffoldRGBO'][1],
                       style['appStyle']['colors']['scaffoldRGBO'][2],
-                      style['appStyle']['colors']['scaffoldRGBO'][3].toDouble(),
+                      style['appStyle']['colors']['scaffoldRGBO'][3],
                     ),
               scaffoldBackgroundColor: style == null
                   ? Colors.white
@@ -143,7 +142,7 @@ class MyAppState extends State<MyApp> with ChangeNotifier {
                       style['appStyle']['colors']['scaffoldRGBO'][0],
                       style['appStyle']['colors']['scaffoldRGBO'][1],
                       style['appStyle']['colors']['scaffoldRGBO'][2],
-                      style['appStyle']['colors']['scaffoldRGBO'][3].toDouble(),
+                      style['appStyle']['colors']['scaffoldRGBO'][3],
                     ),
               fontFamily: 'Nunito',
               textTheme: TextTheme(
@@ -167,7 +166,9 @@ class MyAppState extends State<MyApp> with ChangeNotifier {
               ),
               buttonTheme: ButtonTheme.of(context).copyWith(
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(style == null
+                      ? 10
+                      : style['appStyle']['general']['buttonRadius']),
                 ),
                 buttonColor: style == null
                     ? Colors.blue[900]
@@ -175,13 +176,13 @@ class MyAppState extends State<MyApp> with ChangeNotifier {
                         style['appStyle']['colors']['primaryLightRGBO'][0],
                         style['appStyle']['colors']['primaryLightRGBO'][1],
                         style['appStyle']['colors']['primaryLightRGBO'][2],
-                        style['appStyle']['colors']['primaryLightRGBO'][3]
-                            .toDouble(),
+                        style['appStyle']['colors']['primaryLightRGBO'][3],
                       ),
                 textTheme: ButtonTextTheme.primary,
               ),
             ),
-            home: snapshot.connectionState == ConnectionState.waiting
+            home: snapshot.connectionState == ConnectionState.waiting ||
+                    _isLoading
                 ? Scaffold(
                     body: Center(
                       child: CircularProgressIndicator(),
