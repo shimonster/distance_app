@@ -74,7 +74,6 @@ class _TrackDistanceFloatingActionButtonState
 
   @override
   Widget build(BuildContext context) {
-    print('padding: ${MediaQuery.of(context).viewPadding.top}');
     return Padding(
       padding: EdgeInsets.only(
           top: 120 + MediaQuery.of(context).viewInsets.top, right: 25),

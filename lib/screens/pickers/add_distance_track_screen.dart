@@ -41,19 +41,6 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
   static const _isolateName = 'LocationIsolate';
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-    if (state == AppLifecycleState.paused) {
-      print('paused');
-      _startBackgroundLocation();
-    } else {
-      print('other');
-      IsolateNameServer.removePortNameMapping(_isolateName);
-      BackgroundLocator.unRegisterLocationUpdate();
-    }
-  }
-
-  @override
   void dispose() {
     _hasDisposed = true;
     IsolateNameServer.removePortNameMapping(_isolateName);
@@ -68,29 +55,34 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
     mainStyle = Provider.of<MyAppState>(context, listen: false).style;
     style = mainStyle['appStyle']['distanceDetailsScreen'];
     function = mainStyle['appFunctionality']['addTrackScreen'];
-    Location().requestPermission();
-    Location().changeSettings(
-        interval: function['interval'] * 1000,
-        distanceFilter: _points.isEmpty ? 0 : function['distanceFilter'],
-        accuracy: LocationAccuracy.high);
-    _mapController.onReady.then((value) =>
-        _isAtLastPoint = _mapController.center == _points.last['LatLng']);
-    _locationStream = Location().onLocationChanged
-      ..listen(
-        (LocationData event) => _hasDisposed
-            ? null
-            : _addPoint(
-                {
-                  'LatLng': LatLng(event.latitude, event.longitude),
-                  'alt': event.altitude
-                },
-              ),
-      );
-    IsolateNameServer.registerPortWithName(port.sendPort, _isolateName);
-    port.listen((dynamic data) {
-      _addPoint(data);
+    Location().requestPermission().then((value) {
+      Location().changeSettings(
+          interval: function['interval'] * 1000,
+          distanceFilter: _points.isEmpty ? 0 : function['distanceFilter'],
+          accuracy: LocationAccuracy.high);
+      _mapController.onReady.then((value) =>
+          _isAtLastPoint = _mapController.center == _points.last['LatLng']);
+      _locationStream = Location().onLocationChanged
+        ..listen(
+          (LocationData event) => _hasDisposed
+              ? null
+              : _addPoint(
+                  {
+                    'LatLng': LatLng(event.latitude, event.longitude),
+                    'alt': event.altitude
+                  },
+                ),
+        );
+      IsolateNameServer.registerPortWithName(port.sendPort, _isolateName);
+      port.listen((dynamic data) {
+        _addPoint({
+          'LatLng': LatLng(data.latitude, data.longitude),
+          'alt': data.altitude,
+        });
+        print('background locator');
+      });
+      initPlatformState().then((value) => _startBackgroundLocation());
     });
-    initPlatformState();
   }
 
   Future<void> initPlatformState() async {
@@ -113,6 +105,7 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
   }
 
   void _addPoint(Map<String, dynamic> loc) {
+    print('add distance');
     final addMap = {
       ...loc,
       'time': DateTime.now(),
