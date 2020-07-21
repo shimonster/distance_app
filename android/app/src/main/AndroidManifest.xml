@@ -14,7 +14,7 @@
     <application
         android:name="io.flutter.app.FlutterApplication"
         android:label="distanceapp"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/launcher_icon">
 
         <receiver android:name="rekab.app.background_locator.LocatorBroadcastReceiver"
             android:enabled="true"

@@ -84,7 +84,7 @@ class SQLHelper {
       List<Distance> distances = [];
       final points = await db.query(
         'Distances',
-        orderBy: 'idNum',
+        orderBy: 'time',
       );
       points.forEach((Map<dynamic, dynamic> point) {
         if (pointList.containsKey(point['id'])) {

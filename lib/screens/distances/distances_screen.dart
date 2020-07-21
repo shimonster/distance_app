@@ -63,7 +63,6 @@ class _DistancesScreenState extends State<DistancesScreen>
 
   void rebuild() {
     _isFirstTime = true;
-    _animationController.
     setState(() {});
   }
 

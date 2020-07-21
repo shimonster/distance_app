@@ -22,7 +22,7 @@ class Categories extends ChangeNotifier {
             .document('users/$userId')
             .setData({'categories': _categories});
       } else {
-        if (!(await SQLHelper.getCategories(userId)).contains('All')) {
+        if (!(await SQLHelper.getCategories('')).contains('All')) {
           _categories.forEach((element) async {
             await SQLHelper.addCategory(
                 element, userId ?? '', _categories.indexOf(element));
