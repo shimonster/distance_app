@@ -8,10 +8,12 @@ import 'package:distanceapp/providers/distances.dart';
 import 'package:distanceapp/main.dart';
 
 class DistanceDrawer extends StatefulWidget {
-  DistanceDrawer(this.selectCategory, this.switchMode);
+  DistanceDrawer(
+      this.selectCategory, this.switchMode, this.animationController);
 
   final void Function(String cat) selectCategory;
   final void Function() switchMode;
+  final AnimationController animationController;
 
   @override
   _DistanceDrawerState createState() => _DistanceDrawerState();
@@ -40,12 +42,19 @@ class _DistanceDrawerState extends State<DistanceDrawer> {
   @override
   void initState() {
     super.initState();
+    widget.animationController.reverse();
     Provider.of<Distances>(context, listen: false).getUnits().then(
           (value) => setState(() {
             preferredUnits =
                 Provider.of<Distances>(context, listen: false).preferredUnit;
           }),
         );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    widget.animationController.forward();
   }
 
   @override
@@ -75,25 +84,41 @@ class _DistanceDrawerState extends State<DistanceDrawer> {
               ],
             ),
             StatefulBuilder(
-              builder: (ctx, setButtonState) => DropdownButton<String>(
-                value: preferredUnits,
-                onChanged: (unit) {
-                  setButtonState(() {
-                    preferredUnits = unit;
-                    Provider.of<Distances>(context, listen: false)
-                        .setUnit(unit);
-                  });
-                },
-                items: [
-                  DropdownMenuItem<String>(
-                    value: 'Miles',
-                    child: Text('Miles'),
+              builder: (ctx, setButtonState) => Container(
+                height: style['nameInputHeight'],
+                margin: EdgeInsets.symmetric(
+                    vertical: style['dropDownMarginVertical']),
+                padding: EdgeInsets.symmetric(
+                    horizontal: style['dropDownPaddingHorizontal']),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Theme.of(context).primaryColor,
+                    width: style['buttonBorderWidth'],
                   ),
-                  DropdownMenuItem<String>(
-                    value: 'Kilometers',
-                    child: Text('Kilometers'),
-                  ),
-                ],
+                  borderRadius: BorderRadius.circular(
+                      mainStyle['appStyle']['general']['buttonRadius']),
+                ),
+                child: DropdownButton<String>(
+                  value: preferredUnits,
+                  underline: Container(),
+                  onChanged: (unit) {
+                    setButtonState(() {
+                      preferredUnits = unit;
+                      Provider.of<Distances>(context, listen: false)
+                          .setUnit(unit);
+                    });
+                  },
+                  items: [
+                    DropdownMenuItem<String>(
+                      value: 'Miles',
+                      child: Text('Miles'),
+                    ),
+                    DropdownMenuItem<String>(
+                      value: 'Kilometers',
+                      child: Text('Kilometers'),
+                    ),
+                  ],
+                ),
               ),
             ),
             Divider(),
@@ -129,81 +154,108 @@ class _DistanceDrawerState extends State<DistanceDrawer> {
                           ),
                         ),
                       )
-                    : !_isAdding
-                        ? FlatButton.icon(
-                            label: Text('Add Category'),
-                            icon: Icon(Icons.create_new_folder),
-                            textColor: Theme.of(context).primaryColor,
-                            onPressed: () {
-                              setState(() {
-                                _isAdding = true;
-                              });
-                            },
-                          )
-                        : Container(
-                            height: style['nameInputHeight'],
-                            margin: EdgeInsets.only(
-                                top: style['buttonPadding'],
-                                left: style['buttonPadding'],
-                                right: style['buttonPadding']),
-                            padding: EdgeInsets.symmetric(
-                                horizontal: style['inputHorizontalPadding']),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                width: 2,
-                                color: Theme.of(context).primaryColor,
-                              ),
-                              borderRadius: BorderRadius.circular(
-                                  mainStyle['appStyle']['general']
-                                      ['buttonRadius']),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                Expanded(
-                                  child: Container(
-//                                    width: 200,
-                                    child: TextField(
-                                      controller: _name,
-                                      onChanged: (_) {
-                                        setState(() {});
-                                      },
-                                      onSubmitted: _name.text == ''
-                                          ? null
-                                          : (_) async {
-                                              await addCat();
-                                              _name.clear();
-                                            },
-                                      autofocus: true,
-                                      enableSuggestions: true,
-                                      textAlignVertical:
-                                          TextAlignVertical.bottom,
-                                      decoration: InputDecoration(
-                                        hintText: 'Name',
-                                        border: InputBorder.none,
+                    : StatefulBuilder(
+                        builder: (ctx, setBuilderState) {
+                          return !_isAdding
+                              ? FlatButton.icon(
+                                  label: Text('Add Category'),
+                                  icon: Icon(Icons.create_new_folder),
+                                  textColor: Theme.of(context).primaryColor,
+                                  onPressed: () {
+                                    setBuilderState(() {
+                                      _isAdding = true;
+                                    });
+                                  },
+                                )
+                              : Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Container(
+                                      height: style['nameInputHeight'],
+                                      margin: EdgeInsets.only(
+                                          top: style['buttonPadding'],
+                                          left: style['buttonPadding'],
+                                          right: style['buttonPadding']),
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal:
+                                              style['inputHorizontalPadding']),
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          width: 2,
+                                          color: Theme.of(context).primaryColor,
+                                        ),
+                                        borderRadius: BorderRadius.circular(
+                                            mainStyle['appStyle']['general']
+                                                ['buttonRadius']),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: <Widget>[
+                                          Expanded(
+                                            child: Center(
+                                              child: TextField(
+                                                controller: _name,
+                                                onChanged: (_) {
+                                                  setBuilderState(() {});
+                                                },
+                                                onSubmitted: _name.text == ''
+                                                    ? null
+                                                    : (_) async {
+                                                        await addCat();
+                                                        _name.clear();
+                                                      },
+                                                autofocus: true,
+                                                enableSuggestions: true,
+                                                textAlignVertical:
+                                                    TextAlignVertical.bottom,
+                                                decoration: InputDecoration(
+                                                  hintText: 'Name',
+                                                  border: InputBorder.none,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          IconButton(
+                                            color:
+                                                Theme.of(context).primaryColor,
+                                            padding: EdgeInsets.all(
+                                                style['iconButtonPadding']),
+                                            icon: _isProcessingAdd
+                                                ? FittedBox(
+                                                    child:
+                                                        CircularProgressIndicator(),
+                                                  ) //Icon(Icons.cloud_upload)
+                                                : Icon(
+                                                    Icons.check_circle_outline),
+                                            onPressed: _name.text == '' ||
+                                                    _isProcessingAdd ||
+                                                    cats.categories
+                                                        .contains(_name.text)
+                                                ? null
+                                                : () async {
+                                                    await addCat();
+                                                    _name.clear();
+                                                  },
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                  ),
-                                ),
-                                IconButton(
-                                  color: Theme.of(context).primaryColor,
-                                  padding: EdgeInsets.all(1),
-                                  icon: _isProcessingAdd
-                                      ? FittedBox(
-                                          child: CircularProgressIndicator(),
-                                        ) //Icon(Icons.cloud_upload)
-                                      : Icon(Icons.check_circle_outline),
-                                  onPressed:
-                                      _name.text == '' || _isProcessingAdd
-                                          ? null
-                                          : () async {
-                                              await addCat();
-                                              _name.clear();
-                                            },
-                                ),
-                              ],
-                            ),
-                          ),
+                                    if (cats.categories.contains(_name.text))
+                                      Padding(
+                                        padding: EdgeInsets.only(
+                                            left: style['buttonPadding'] + 5),
+                                        child: Text(
+                                          'Already taken',
+                                          style: TextStyle(
+                                              color:
+                                                  Theme.of(context).errorColor,
+                                              fontSize: 16),
+                                        ),
+                                      ),
+                                  ],
+                                );
+                        },
+                      ),
               ),
             ),
           ],

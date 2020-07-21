@@ -56,6 +56,9 @@ appStyle:
         buttonBorderWidth: 2.0
         nameInputHeight: 40.0
         inputHorizontalPadding: 10.0
+        dropDownMarginVertical: 8.0
+        dropDownPaddingHorizontal: 8.0
+        iconButtonPadding: 1.0
     distanceDisplayWidget:
         radius: 13.0
         elevation: 10.0

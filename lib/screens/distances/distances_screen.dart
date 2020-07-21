@@ -25,11 +25,15 @@ class _DistancesScreenState extends State<DistancesScreen>
   var _hasDisposed = false;
   AnimationController _animationController;
   Animation _offsetAnimation;
-  bool shouldAnimate = true;
+  bool _isFirstTime = true;
+  Map mainStyle;
+  Map style;
 
   @override
   void initState() {
     super.initState();
+    mainStyle = Provider.of<MyAppState>(context, listen: false).style;
+    style = mainStyle['appStyle']['distancesScreen'];
     Provider.of<Categories>(context, listen: false)
         .getCategories()
         .then(
@@ -58,52 +62,51 @@ class _DistancesScreenState extends State<DistancesScreen>
   }
 
   void rebuild() {
+    _isFirstTime = true;
+    _animationController.
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    final mainStyle = Provider.of<MyAppState>(context, listen: false).style;
-    final style = mainStyle['appStyle']['distancesScreen'];
-
     final distances = Provider.of<Distances>(context, listen: false);
     final List<Distance> distanceCats = distances.distances
         .where((element) => element.cat == _category)
         .toList();
 
     void _selectCategory(String cat) {
-      shouldAnimate = true;
       setState(() {
         Navigator.of(context).pop();
         _category = cat;
       });
-//      if (_animationController != null) _animationController.reset();
     }
 
-    final offsetStart = ((Provider.of<Distances>(context, listen: false)
-                    .distances
-                    .where((element) =>
-                        _category == 'All' ? true : element.cat == _category)
-                    .length +
-                1) /
-            ((MediaQuery.of(context).size.width / style['maxCrossAxisExtent'])
-                .ceil()))
-        .ceil();
+//    final offsetStart = ((Provider.of<Distances>(context, listen: false)
+//                    .distances
+//                    .where((element) =>
+//                        _category == 'All' ? true : element.cat == _category)
+//                    .length +
+//                1) /
+//            ((/*MediaQuery.of(context).size.width / style['maxCrossAxisExtent']*/ 2)
+//                .ceil()))
+//        .ceil();
     _animationController = AnimationController(
       duration: Duration(
-          milliseconds: offsetStart * style['multiplyOffsetDuration'] +
-              style['addOffsetDuration']),
+//          milliseconds: offsetStart * style['multiplyOffsetDuration'] +
+//              style['addOffsetDuration']),
+          milliseconds: 300),
       vsync: this,
     );
     _offsetAnimation = Tween<Offset>(
-      begin: Offset(0, -offsetStart.toDouble()),
+      begin: Offset(-2.5, 0),
       end: Offset(0, 0),
     ).animate(
       CurvedAnimation(curve: Curves.easeOutQuad, parent: _animationController),
     );
 
     return Scaffold(
-      drawer: DistanceDrawer(_selectCategory, widget.switchMode),
+      drawer: DistanceDrawer(
+          _selectCategory, widget.switchMode, _animationController),
       appBar: AppBar(
         title: Text(_category),
         actions: <Widget>[
@@ -136,10 +139,10 @@ class _DistancesScreenState extends State<DistancesScreen>
               ),
               padding: EdgeInsets.all(style['spacing']),
               itemBuilder: (ctx, i) {
-                if (shouldAnimate)
+                if (_isFirstTime)
                   _animationController
                       .forward()
-                      .then((value) => shouldAnimate = false);
+                      .then((value) => _isFirstTime = false);
                 if (i !=
                     (_category == 'All'
                         ? distances.distances.length
@@ -153,6 +156,7 @@ class _DistancesScreenState extends State<DistancesScreen>
                               .where((element) => element.cat == _category)
                               .toList()[i]
                               .id,
+                      rebuild,
                       ValueKey(distances.distances[i].id),
                     ),
                   );

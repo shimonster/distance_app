@@ -45,7 +45,7 @@ class MyAppState extends State<MyApp> with ChangeNotifier {
       setState(() {
         style = value;
         _isLoading = false;
-        primaryDark = style['appStyle']['colors']['primaryLightRGBO'];
+        primaryDark = style['appStyle']['colors']['primaryDarkRGBO'];
         primary = style['appStyle']['colors']['primaryRGBO'];
         primaryLight = style['appStyle']['colors']['primaryLightRGBO'];
         accent = style['appStyle']['colors']['accentRGBO'];

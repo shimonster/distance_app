@@ -12,9 +12,10 @@ import 'package:distanceapp/screens/distances/distance_details_screen.dart';
 import 'package:distanceapp/helpers/config.dart';
 
 class DistanceDisplayWidget extends StatelessWidget {
-  DistanceDisplayWidget(this.distId, key) : super(key: key);
+  DistanceDisplayWidget(this.distId, this.rebuild, key) : super(key: key);
 
   final String distId;
+  final void Function() rebuild;
 
   final _mapController = MapController();
 
@@ -45,11 +46,15 @@ class DistanceDisplayWidget extends StatelessWidget {
         child: InkWell(
           splashColor: Colors.white,
           onTap: () {
-            Navigator.of(context).push(
+            Navigator.of(context)
+                .push(
               MaterialPageRoute(
                 builder: (ctx) => DistanceDetailsScreen(dist),
               ),
-            );
+            )
+                .then((_) {
+              rebuild();
+            });
           },
           child: GridTile(
             child: Stack(
