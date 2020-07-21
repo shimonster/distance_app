@@ -112,7 +112,7 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
     };
     if (_mapController.ready) {
       if (_mapController.center == _points.last['LatLng']) {
-        _mapController.move(_points.last['LatLng'], _mapController.zoom);
+        _mapController.move(loc['LatLng'], _mapController.zoom);
       }
     }
     if (_points.isNotEmpty) {

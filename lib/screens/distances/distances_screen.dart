@@ -117,7 +117,7 @@ class _DistancesScreenState extends State<DistancesScreen>
             onPressed: () {
               Navigator.of(context)
                   .pushNamed(AddDistanceTrackScreen.routeName)
-                  .then((value) => rebuild());
+                  .then((value) => _isFirstTime = true);
             },
           )
         ],
