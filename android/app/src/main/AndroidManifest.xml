@@ -13,7 +13,7 @@
 
     <application
         android:name="io.flutter.app.FlutterApplication"
-        android:label="distanceapp"
+        android:label="Distentia"
         android:icon="@mipmap/launcher_icon_new">
 
         <receiver android:name="rekab.app.background_locator.LocatorBroadcastReceiver"

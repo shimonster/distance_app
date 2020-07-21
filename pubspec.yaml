@@ -53,8 +53,7 @@ dev_dependencies:
 flutter_icons:
   android: launcher_icon_new
 #  image_path: assets/start-and-finish.png
-  adaptive_icon_background: assets/Untitled presentation.png
-  image_path: assets/Untitled presentation.png
+  image_path: assets/images/new_circle_icon_3.png
 #  adaptive_icon_foreground: assets/start-and-finish.png
 
 # For information on the generic Dart part of this file, see the
@@ -77,6 +76,9 @@ flutter:
      - assets/gradient.png
      - assets/start-and-finish.png
      - assets/Untitled presentation.png
+     - assets/images/new_circle_icon.png
+     - assets/images/new_circle_icon_2.png
+     - assets/images/new_circle_icon_3.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

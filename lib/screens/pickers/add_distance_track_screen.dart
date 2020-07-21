@@ -117,6 +117,11 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
       ...loc,
       'time': DateTime.now(),
     };
+    if (_mapController.ready) {
+      if (_mapController.center == _points.last['LatLng']) {
+        _mapController.move(_points.last['LatLng'], _mapController.zoom);
+      }
+    }
     if (_points.isNotEmpty) {
       final dist = d.Distances('').computeTotalDist([addMap, _points.last]);
       if (dist > function['distanceFilter']) {
@@ -128,11 +133,6 @@ class _AddDistanceTrackScreenState extends State<AddDistanceTrackScreen>
       setState(() {
         _points.add(addMap);
       });
-    }
-    if (_mapController.ready) {
-      if (_mapController.center == _points.last['LatLng']) {
-        _mapController.move(_points.last['LatLng'], _mapController.zoom);
-      }
     }
   }
 
