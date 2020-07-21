@@ -115,7 +115,7 @@ class _AuthCardState extends State<AuthCard> {
                         return 'Please enter a password';
                       }
                       if (value.length < 7) {
-                        return 'Passwords must be at least 7 characters long';
+                        return 'Password must be 7 characters long';
                       }
                       return null;
                     },
@@ -137,7 +137,7 @@ class _AuthCardState extends State<AuthCard> {
                   ),
                   if (!_isLoading)
                     RaisedButton(
-                      child: Text(_isLogin ? 'Login' : 'Signup'),
+                      child: Text(_isLogin ? 'Login' : 'Sign up'),
                       onPressed: _authenticate,
                     )
                   else
@@ -177,7 +177,7 @@ class _AuthCardState extends State<AuthCard> {
                       ),
                     ),
                   FlatButton(
-                    child: Text('${_isLogin ? 'Signup' : 'Login'} instead'),
+                    child: Text('${_isLogin ? 'Create an acount' : 'Already have an acount'}'),
                     onPressed: _isLoading
                         ? null
                         : () {
