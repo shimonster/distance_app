@@ -177,7 +177,8 @@ class _AuthCardState extends State<AuthCard> {
                       ),
                     ),
                   FlatButton(
-                    child: Text('${_isLogin ? 'Create an acount' : 'Already have an acount'}'),
+                    child: Text(
+                        '${_isLogin ? 'Create an acount' : 'Already have an acount'}'),
                     onPressed: _isLoading
                         ? null
                         : () {
